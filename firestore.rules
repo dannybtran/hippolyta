@@ -7,11 +7,12 @@ service cloud.firestore {
     }
     match /games/{gameId} {
       allow read;
-      allow create, update: if request.auth != null
-                    && request.resource.data.creator_id == request.auth.token.user_id
-                    && (request.resource.data.oppo_id == null ||
-                        request.resource.data.oppo_id == request.auth.token.user_id
-                       );  
+      allow create, update: if request.auth != null && (
+        request.resource.data.creatorId == request.auth.token.user_id || (
+          request.resource.data.oppoId == null ||
+          request.resource.data.oppoId == request.auth.token.user_id
+        )
+      );
       allow delete: if false;
     }
     match /users/{userId} {

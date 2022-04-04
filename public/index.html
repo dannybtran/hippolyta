@@ -34,7 +34,7 @@
   <h1>Hippolyta - Game of the Amazons
 </nav>
 <div id="buttons">
-    <button class="mdc-button mdc-button--raised" id="createBtn">
+    <button class="mdc-button mdc-button--raised hidden" id="createBtn">
         <i class="material-icons mdc-button__icon" aria-hidden="true">bolt</i>
         <span class="mdc-button__label">real-time game</span>
     </button>
@@ -67,7 +67,7 @@
 <div>
     <span id="currentRoom"></span>
 </div>
-<div id="rooms" class="module">
+<div id="rooms" class="module hidden">
   <label>Real Time Games</label>
   <ul>
   </ul>
@@ -85,7 +85,7 @@
 
 <div id="game" class="hidden">
   <div id="board" ></div>
-  <div id="player1"></div>
+  <div id="player1" class="active"></div>
   <div id="player2"></div>
   <div id="chat">
     <div id="chatLog"></div>

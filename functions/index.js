@@ -1,9 +1,20 @@
-const startBackend = () => {
-  firebase.firestore().collection('games').onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach(change => {
-      const data = change.doc.data()
+const functions = require('firebase-functions');
+const { initializeApp } = require("firebase-admin/app");
+initializeApp({
+        apiKey: "AIzaSyA-b92xdvZMaI0uh8opLc9S1_qh55HNixY",
+        authDomain: "hippolyta-game.firebaseapp.com",
+        projectId: "hippolyta-game",
+        storageBucket: "hippolyta-game.appspot.com",
+        messagingSenderId: "1061620854015",
+        appId: "1:1061620854015:web:c84f282a52f4ee420bf0ca"
+});
+
+exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
+  change => {
+      console.log(change)
+      const data = change.after.data()
       if (data.player1 && data.player2 && !data.board) {
-        firebase.firestore().collection('games').doc(change.doc.id).update({
+        change.after.ref.update({
           board: newBoard(),
           state: 'player1_move',
           lastMove1: null,
@@ -20,12 +31,12 @@ const startBackend = () => {
         const move = JSON.parse(data.lastMove1)
         if (validMove(board, move)) {
           const nextBoard = JSON.stringify(makeMove(board, move))
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             board: nextBoard,
             state: 'player1_shoot',
           })
         } else {
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             lastMove1: null,
           })
         }
@@ -36,14 +47,14 @@ const startBackend = () => {
         const shot = JSON.parse(data.lastShot1)
         if (validShot(board, shot)) {
           const nextBoard = JSON.stringify(makeShot(board, shot, 'w'))
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             board: nextBoard,
             state: 'player2_move',
             lastMove2: null,
             lastShot2: null,
           })
         } else {
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             lastShot1: null,
           })
         }
@@ -54,12 +65,12 @@ const startBackend = () => {
         const move = JSON.parse(data.lastMove2)
         if (validMove(board, move)) {
           const nextBoard = JSON.stringify(makeMove(board, move))
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             board: nextBoard,
             state: 'player2_shoot',
           })
         } else {
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             lastMove2: null,
           })
         }
@@ -70,22 +81,21 @@ const startBackend = () => {
         const shot = JSON.parse(data.lastShot2)
         if (validShot(board, shot)) {
           const nextBoard = JSON.stringify(makeShot(board, shot, 'w'))
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             board: nextBoard,
             state: 'player1_move',
             lastMove1: null,
             lastShot1: null,
           })
         } else {
-          firebase.firestore().collection('games').doc(change.doc.id).update({
+          change.after.ref.update({
             lastShot2: null,
           })
         }
       }
 
-    })
-  })
-}
+    }
+)
 
 const newBoard = () => (JSON.stringify(
   [
@@ -135,10 +145,10 @@ const checkWin = (b, gameId) => {
   })
 
   if (!whiteQueens.map(c => isStuck(c, b)).includes(false)) {
-    firebase.firestore().collection('games').doc(gameId).update({state: 'player2_wins'})
+    firestore().collection('games').doc(gameId).update({state: 'player2_wins'})
     return true
   } else if (!blackQueens.map(c => isStuck(c,b)).includes(false)) {
-    firebase.firestore().collection('games').doc(gameId).update({state: 'player1_wins'})
+    firestore().collection('games').doc(gameId).update({state: 'player1_wins'})
     return true
   }
 }

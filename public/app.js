@@ -141,6 +141,7 @@ async function refreshRooms() {
     const $span = document.createElement('span')
     $span.classList.add('mdc-button__label')
 
+    if (player1 === firebase.auth().getUid() || player2 === firebase.auth().getUid()) { return }
 
     if (player1 && !player2) {
       const user = await db.collection('users').doc(player1).get()
@@ -290,9 +291,6 @@ async function createRoom(roomId) {
 
 async function joinRoomById(roomId) {
   hide('#rooms')
-  document.querySelector('#createBtn').disabled = true;
-  document.querySelector('#refreshBtn').disabled = true;
-  document.querySelector('#hangupBtn').disabled = false;
   document.querySelector(
       '#currentRoom').innerText = `Current room is ${roomId} - You are the callee!`;
 
@@ -354,7 +352,6 @@ async function joinDailyById(gameId) {
   const data = (await game.get()).data()
   await game.update({
     oppoId: firebase.auth().getUid(),
-    state: 'player1_turn',
     player1: data.player1 || firebase.auth().getUid(),
     player2: data.player2 || firebase.auth().getUid(),
   })
@@ -363,24 +360,73 @@ async function joinDailyById(gameId) {
 
 async function gotoDailyById(gameId) {
   if (!firebase.auth().currentUser) { await signInAndSaveUser() }
+  const $board = document.querySelector('#board')
+  $board.innerHTML = '' // clear the existing chess board HTML  
   const db = firebase.firestore()
   const $p1 = document.querySelector('#player1')
   const $p2 = document.querySelector('#player2')
   const game = await db.collection('games').doc(gameId)
   const data = (await game.get()).data()
   const { player1, player2 } = data
-  const p1 = await db.collection('users').doc(player1).get()
-  const p2 = await db.collection('users').doc(player2).get()
-  $p1.innerText = p1.data().name
-  $p2.innerText = p2.data().name
+  if (player1) {
+    const p1 = await db.collection('users').doc(player1).get()
+    $p1.innerText = p1.data().name
+  } else {
+    $p1.innerText = 'Waiting'
+  }
+  if (player2) {
+    const p2 = await db.collection('users').doc(player2).get()
+    $p2.innerText = p2.data().name
+  } else {
+    $p2.innerText = 'Waiting'
+  }
   game.onSnapshot(async (data) => {
     const d = data.data()
-    addChatMsg(`Status is ${d.state}`)
     if (d.board) draw(JSON.parse(d.board))
-    if (d.state === 'player1_turn' && player1 === firebase.auth().getUid()) {
-      await activateTurn('w', d.board)
-    } else if (d.state === 'player2_turn' && player2 === firebase.auth().getUid()) {
-      await activateTurn('b', d.board)
+    if (d.player2 && $p2.innerText === 'Waiting') {
+      const p2 = await db.collection('users').doc(d.player2).get()
+      $p2.innerText = p2.data().name
+    }
+    if (d.player1 && $p1.innerText === 'Waiting') {
+      const p1 = await db.collection('users').doc(d.player1).get()
+      $p1.innerText = p1.data().name
+    }
+    if (d.state === 'player1_move') {
+      $p1.classList.add('active')
+      $p2.classList.remove('active')
+      if (player1 === firebase.auth().getUid()) {
+        await activateMoveTurn('w', d.board, gameId)
+      }
+      showLastMoveAndShot(d.board, d.lastMove2, d.lastShot2)
+    } else if (d.state === 'player2_move') {
+      $p2.classList.add('active')
+      $p1.classList.remove('active')
+      if (player2 === firebase.auth().getUid()) {
+        await activateMoveTurn('b', d.board, gameId)
+      }
+      showLastMoveAndShot(d.board, d.lastMove1, d.lastShot1)
+    } else if (d.state === 'player1_shoot') {
+      $p1.classList.add('active')
+      $p2.classList.remove('active')
+      if (player1 === firebase.auth().getUid()) {
+        await activateShootTurn('w', d.board, d.lastMove1, gameId)
+      } else {
+        showLastMoveAndShot(d.board, d.lastMove1, d.lastMove1)
+      }
+      showLastMoveAndShot(d.board, d.lastMove2, d.lastShot2)
+    } else if (d.state === 'player2_shoot') {
+      $p2.classList.add('active')
+      $p1.classList.remove('active')
+      if (player2 === firebase.auth().getUid()) {
+        await activateShootTurn('b', d.board, d.lastMove2, gameId)
+      } else {
+        showLastMoveAndShot(d.board, d.lastMove2, d.lastMove2)
+      }
+      showLastMoveAndShot(d.board, d.lastMove1, d.lastShot1)
+    } else if (d.state === 'player1_wins') {
+      addChatMsg('White wins!')
+    } else if (d.state === 'player2_wins') {
+      addChatMsg('Black wins!')
     }
   })
   hide('#rooms')
@@ -393,33 +439,72 @@ async function gotoDailyById(gameId) {
   show('#game', 'block')
 }
 
-let $selectedSquare
-let abort = new AbortController()
+let abort
 
-async function activateTurn(color, board) {
+async function showLastMoveAndShot(board, move, shot) {
   const b = JSON.parse(board)
+  const m = JSON.parse(move)
+  const s = JSON.parse(shot)
+  let key = `s${m.ny * b.length + m.nx}`
+  let $square = document.getElementById(key)
+  $square.classList.add('lastMove')
+  key = `s${s.ny * b.length + s.nx}`
+  $square = document.getElementById(key)
+  $square.classList.add('lastShot')
+}
+
+async function activateMoveTurn(color, board, gameId) {
+  const b = JSON.parse(board)
+  abort = new AbortController()
   b.forEach((r, y) => {
     r.forEach((piece, x) => {
       if (piece?.color === color && piece?.type === 'q') {
         const key = `s${y * b.length + x}`
         const $square = document.getElementById(key)
         $square.classList.add('highlight')
-        $square.addEventListener('click', (e) => selectedSquare(e, b, x, y), {signal: abort.signal})
+        $square.addEventListener('click', (e) => selectedMoveSquare(e, b, x, y, gameId, color), {signal: abort.signal})
       }
     })
   })
 }
 
-async function selectedSquare(e, board, x, y) {
-  $selectedSquare = e.target
-  Array.from(document.getElementsByClassName('square')).forEach($e =>
-    $e.classList.remove('highlight', 'selected', 'possibleMove')
-  )
-  $selectedSquare.classList.add('selected')
-  highlightPossibleSquares(board, x, y)
+async function activateShootTurn(color, board, lastMove, gameId) {
+  abort = new AbortController()
+  const lm = JSON.parse(lastMove)
+  const b = JSON.parse(board)
+  const x = lm.nx
+  const y = lm.ny
+  const key = `s${y * b.length + x}`
+  const $square = document.getElementById(key)
+  $square.classList.add('selected')
+  highlightPossibleShootSquares(b, x, y, gameId, color)
 }
 
-async function highlightPossibleSquares(b, x, y) {
+async function selectedMoveSquare(e, b, x, y, gameId, color) {
+  const $selectedSquare = e.target
+  Array.from(document.getElementsByClassName('square')).forEach($e =>
+    $e.classList.remove('highlight', 'selected', 'possibleMove', 'possibleShoot')
+  )
+  $selectedSquare.classList.add('selected')
+  highlightPossibleMoveSquares(b, x, y, gameId, color)
+}
+
+async function highlightPossibleShootSquares(b, x, y, gameId, color) {
+  [[1,0], [1,-1], [0,-1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1,1]].forEach(c => {
+    let dx = c[0]
+    let dy = c[1]
+    while(b[y+dy] && b[y+dy][x+dx] === null) {
+      const key = `s${(y + dy) * b.length + x + dx}`
+      const $square = document.getElementById(key)
+      $square.classList.add('possibleShoot')
+      $square.addEventListener('click', shootToSquare.bind(this, b, x, y, x + dx, y + dy, gameId, color), {signal: abort.signal})
+      dx += c[0]
+      dy += c[1]
+    }
+  })
+}
+
+async function highlightPossibleMoveSquares(b, x, y, gameId, color) {
   [[1,0], [1,-1], [0,-1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1,1]].forEach(c => {
     let dx = c[0]
     let dy = c[1]
@@ -427,27 +512,38 @@ async function highlightPossibleSquares(b, x, y) {
       const key = `s${(y + dy) * b.length + x + dx}`
       const $square = document.getElementById(key)
       $square.classList.add('possibleMove')
-      $square.addEventListener('click', moveToSquare.bind(this, b, x, y, x + dx, y + dy), {signal: abort.signal})
+      $square.addEventListener('click', moveToSquare.bind(this, b, x, y, x + dx, y + dy, gameId, color), {signal: abort.signal})
       dx += c[0]
       dy += c[1]
     }
   })
 }
 
-async function moveToSquare(b, x, y, nx, ny) {
+async function moveToSquare(b, x, y, nx, ny, gameId, color) {
   abort.abort()
   Array.from(document.getElementsByClassName('square')).forEach($e =>
     $e.classList.remove('highlight', 'selected', 'possibleMove')
   )
-  console.log('moving from', x, y, 'to', nx, ny)
+  const key = color === 'w' ? 'lastMove1' : 'lastMove2'
+  await firebase.firestore().collection('games').doc(gameId).update({[key]: JSON.stringify({x,y,nx,ny})})
 }
+
+async function shootToSquare(b, x, y, nx, ny, gameId, color) {
+  abort.abort()
+  Array.from(document.getElementsByClassName('square')).forEach($e =>
+    $e.classList.remove('highlight', 'selected', 'possibleMove')
+  )
+  const key = color === 'w' ? 'lastShot1' : 'lastShot2'
+  await firebase.firestore().collection('games').doc(gameId).update({[key]: JSON.stringify({x,y,nx,ny})})
+}
+
 async function leaveDaily(e) {
     hide('#leaveDailyBtn')
     hide('#game')
-    show('#createBtn')
+    //show('#createBtn')
     show('#createDailyBtn')
     show('#refreshBtn')
-    show('#rooms', 'block')
+    //show('#rooms', 'block')
     show('#dailies', 'block')
     show('#mydailies', 'block')
 }
@@ -457,8 +553,6 @@ async function hangUp(e) {
     peerConnection.close();
   }
 
-  document.querySelector('#createBtn').disabled = true;
-  document.querySelector('#hangupBtn').disabled = true;
   document.querySelector('#currentRoom').innerText = '';
 
   // Delete room on hangup
