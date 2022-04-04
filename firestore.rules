@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{roomId} {
+      allow read, create, update;
+      allow delete: if false;
+    }
+    match /games/{gameId} {
+      allow read;
+      allow create, update: if request.auth != null
+                    && request.resource.data.creator_id == request.auth.token.user_id
+                    && (request.resource.data.oppo_id == null ||
+                        request.resource.data.oppo_id == request.auth.token.user_id
+                       );  
+      allow delete: if false;
+    }
+    match /users/{userId} {
+      allow read;
+      allow create, update: if request.auth != null
+                    && request.resource.data.id == request.auth.token.user_id;
+      allow delete: if false;
+    }
+  }
+}

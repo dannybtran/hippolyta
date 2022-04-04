@@ -9,41 +9,91 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <!-- update the version number as needed -->
-    <script defer src="/__/firebase/5.9.3/firebase-app.js"></script>
+    <script src="/__/firebase/5.9.3/firebase-app.js"></script>
     <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/5.9.3/firebase-firestore.js"></script>
+    <script src="/__/firebase/5.9.3/firebase-firestore.js"></script>
+    <script src="/__/firebase/5.9.3/firebase-auth.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+    <script src="/__/firebase/init.js"></script>
 
+    <script type="module">
+      const firebaseConfig = {
+        apiKey: "AIzaSyA-b92xdvZMaI0uh8opLc9S1_qh55HNixY",
+        authDomain: "hippolyta-game.firebaseapp.com",
+        projectId: "hippolyta-game",
+        storageBucket: "hippolyta-game.appspot.com",
+        messagingSenderId: "1061620854015",
+        appId: "1:1061620854015:web:c84f282a52f4ee420bf0ca"
+      };
+    </script>
     <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="svgs.js"></script>
 </head>
 <body>
-<h1>Welcome to FirebaseRTC!</h1>
+<nav>
+  <h1>Hippolyta - Game of the Amazons
+</nav>
 <div id="buttons">
-    <button class="mdc-button mdc-button--raised" id="cameraBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">perm_camera_mic</i>
-        <span class="mdc-button__label">Open camera & microphone</span>
+    <button class="mdc-button mdc-button--raised" id="createBtn">
+        <i class="material-icons mdc-button__icon" aria-hidden="true">bolt</i>
+        <span class="mdc-button__label">real-time game</span>
     </button>
-    <button class="mdc-button mdc-button--raised" disabled id="createBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">group_add</i>
-        <span class="mdc-button__label">Create room</span>
+    <button class="mdc-button mdc-button--raised" id="createDailyBtn">
+        <i class="material-icons mdc-button__icon" aria-hidden="true">light_mode</i>
+        <span class="mdc-button__label">daily game</span>
     </button>
-    <button class="mdc-button mdc-button--raised" disabled id="joinBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">group</i>
-        <span class="mdc-button__label">Join room</span>
-    </button>
-    <button class="mdc-button mdc-button--raised" disabled id="hangupBtn">
+    <button class="mdc-button mdc-button--raised hidden" id="hangupBtn">
         <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
-        <span class="mdc-button__label">Hangup</span>
+        <span class="mdc-button__label">Leave</span>
+    </button>
+    <button class="mdc-button mdc-button--raised hidden" id="leaveDailyBtn">
+        <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
+        <span class="mdc-button__label">Leave</span>
+    </button>
+    <button class="mdc-button mdc-button--raised" id="refreshBtn">
+        <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
+        <span class="mdc-button__label">Refresh Games</span>
+    </button>
+    <button class="mdc-button mdc-button--raised hidden" id="playAsWhite">
+        <span class="mdc-button__label">play as white</span>
+    </button>
+    <button class="mdc-button mdc-button--raised hidden" id="playAsBlack">
+        <span class="mdc-button__label">play as black</span>
+    </button>
+    <button class="mdc-button mdc-button--raised hidden" id="playAsRandom">
+        <span class="mdc-button__label">play as random</span>
     </button>
 </div>
 <div>
     <span id="currentRoom"></span>
 </div>
-<div id="videos">
-    <video id="localVideo" muted autoplay playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
+<div id="rooms" class="module">
+  <label>Real Time Games</label>
+  <ul>
+  </ul>
 </div>
+<div id="dailies" class="module">
+  <label>Daily Games</label>
+  <ul>
+  </ul>
+</div>
+<div id="mydailies" class="module">
+  <label>My Daily Games</label>
+  <ul>
+  </ul>
+</div>
+
+<div id="game" class="hidden">
+  <div id="board" ></div>
+  <div id="player1"></div>
+  <div id="player2"></div>
+  <div id="chat">
+    <div id="chatLog"></div>
+    <input type="text" id="chatEntry" />
+  </div>
+</div>
+
+
 <div class="mdc-dialog"
      id="room-dialog"
      role="alertdialog"
@@ -74,6 +124,35 @@
     </div>
     <div class="mdc-dialog__scrim"></div>
 </div>
+
+<div class="mdc-dialog"
+     id="name-dialog"
+     role="alertdialog"
+     aria-modal="true"
+     aria-labelledby="my-dialog-title"
+     aria-describedby="my-dialog-content">
+    <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface">
+            <h2 class="mdc-dialog__title" id="my-dialog-title">Enter your name</h2>
+            <div class="mdc-dialog__content" id="my-dialog-content">
+                Enter your name:
+                <div class="mdc-text-field">
+                    <input type="text" id="user-name" class="mdc-text-field__input">
+                    <div class="mdc-line-ripple"></div>
+                </div>
+            </div>
+            <footer class="mdc-dialog__actions">
+                <button id="submitName" type="button" class="mdc-button mdc-dialog__button"
+                        data-mdc-dialog-action="yes">
+                    <span class="mdc-button__label">Submit</span>
+                </button>
+            </footer>
+        </div>
+    </div>
+    <div class="mdc-dialog__scrim"></div>
+</div>
+
 <script src="app.js"></script>
+<script src="backend.js"></script>
 </body>
 </html>

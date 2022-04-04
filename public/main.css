@@ -6,6 +6,10 @@ body {
     padding: 0;
 }
 
+.hidden {
+  display: none;
+}
+
 #message {
     background: white;
     max-width: 360px;
@@ -87,4 +91,95 @@ div#videos > video {
     height: 100%;
     display: block;
     margin: 1em;
+}
+
+.module {
+  padding: 1rem;
+  border: 1px solid grey;
+  margin-top: 1rem;
+}
+
+#rooms ul li > span, #dailies ul li > span, #mydailies ul li > span {
+  width: 75%;
+  display: inline-block;
+}
+
+#chatLog {
+  padding: 1rem;
+  border: 1px solid grey;
+  width: 100%;
+  height: 400px;
+  margin-top: 1rem;
+  display: inline-block;
+  box-sizing: border-box;
+  white-space: pre;
+}
+
+#chatEntry {
+  display: block;
+  font-size: 1rem;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dailyJoinWrapper {
+  display: inline-block;
+  width: 200px;
+  text-align: center;
+}
+
+.square { border: 2px solid rgba(0,0,0,0.1);
+  box-sizing: border-box; position: relative; }
+#board .influence { border: 2px solid black; }
+#board .hovered { border: 2px solid chartreuse; }
+.square:after { content: ""; display: block; padding-bottom: 100%;
+  pointer-events: none; }
+.square .piece { top: 50%; left: 50%;
+  position: absolute; line-height: 100%; pointer-events: none;
+  transform: translate(-50% , -50%); }
+.darkener { background: rgba(0,0,0,0.08); position: absolute; top: 0;
+  left: 0; bottom: 0; right: 0; pointer-events: none; }
+
+container { display: flex; flex-wrap: wrap; }
+svg { transform: scale(0.8); }
+
+#board { width: 100%; display: flex; flex-wrap: wrap; margin-top: 1rem; }
+
+.square.highlight {
+  border: 2px solid green;
+  cursor: pointer;
+}
+.square.selected {
+  border: 2px solid blue;
+}
+.square.possibleMove {
+  cursor: pointer;
+}
+.square.possibleMove .control {
+  background-color: green;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -0.5rem;
+  margin-left: -0.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  #board { width: 50%; }
+  #top { font-size: 1rem; margin-top: 1rem; }
+  #fen { font-size: 1rem; }
+  #load { font-size: 1rem; }
+  #side { width: 40%; padding-left: 1rem; }
+  #pgn { font-size: 1rem; }
+  #loadPgn { font-size: 1rem; }
+}
+
+@media screen and (min-width: 1024px) {
+  #board { width: 40%; }
+  svg { transform: scale(1); }
 }
