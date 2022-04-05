@@ -1,99 +1,53 @@
 const functions = require('firebase-functions');
 const { initializeApp } = require("firebase-admin/app");
-initializeApp({
-        apiKey: "AIzaSyA-b92xdvZMaI0uh8opLc9S1_qh55HNixY",
-        authDomain: "hippolyta-game.firebaseapp.com",
-        projectId: "hippolyta-game",
-        storageBucket: "hippolyta-game.appspot.com",
-        messagingSenderId: "1061620854015",
-        appId: "1:1061620854015:web:c84f282a52f4ee420bf0ca"
-});
 
 exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
   change => {
-      console.log(change)
       const data = change.after.data()
       if (data.player1 && data.player2 && !data.board) {
         change.after.ref.update({
           board: newBoard(),
           state: 'player1_move',
-          lastMove1: null,
-          lastShot1: null,
-          lastMove2: null,
-          lastShot2: null,
+          lastMoveAndShot1: null,
+          lastMoveAndShot2: null,
         })
       }
 
-      if (checkWin(JSON.parse(data.board), change.doc.id)) return;
+      if (data.board && checkWin(JSON.parse(data.board), change.after.ref)) return 0;
 
-      if (data.state === 'player1_move' && data.lastMove1 && !data.lastShot1) {
+      if (data.state === 'player1_move' && data.lastMoveAndShot1) {
         const board = JSON.parse(data.board)
-        const move = JSON.parse(data.lastMove1)
-        if (validMove(board, move)) {
-          const nextBoard = JSON.stringify(makeMove(board, move))
-          change.after.ref.update({
-            board: nextBoard,
-            state: 'player1_shoot',
-          })
-        } else {
-          change.after.ref.update({
-            lastMove1: null,
-          })
-        }
-      }
-
-      if (data.state === 'player1_shoot' && data.lastMove1 && data.lastShot1) {
-        const board = JSON.parse(data.board)
-        const shot = JSON.parse(data.lastShot1)
-        if (validShot(board, shot)) {
-          const nextBoard = JSON.stringify(makeShot(board, shot, 'w'))
+        const {move, shot} = JSON.parse(data.lastMoveAndShot1)
+        if (validShot(validMove(board, move), shot)) {
+          const nextBoard = JSON.stringify(makeShot(makeMove(board, move), shot, 'w'))
           change.after.ref.update({
             board: nextBoard,
             state: 'player2_move',
-            lastMove2: null,
-            lastShot2: null,
+            lastMoveAndShot2: null,
           })
         } else {
           change.after.ref.update({
-            lastShot1: null,
+            lastMoveAndShot1: null,
           })
         }
       }
 
-      if (data.state === 'player2_move' && data.lastMove2 && !data.lastShot2) {
+      if (data.state === 'player2_move' && data.lastMoveAndShot2) {
         const board = JSON.parse(data.board)
-        const move = JSON.parse(data.lastMove2)
-        if (validMove(board, move)) {
-          const nextBoard = JSON.stringify(makeMove(board, move))
-          change.after.ref.update({
-            board: nextBoard,
-            state: 'player2_shoot',
-          })
-        } else {
-          change.after.ref.update({
-            lastMove2: null,
-          })
-        }
-      }
-
-      if (data.state === 'player2_shoot' && data.lastMove2 && data.lastShot2) {
-        const board = JSON.parse(data.board)
-        const shot = JSON.parse(data.lastShot2)
-        if (validShot(board, shot)) {
-          const nextBoard = JSON.stringify(makeShot(board, shot, 'w'))
+        const {move, shot} = JSON.parse(data.lastMoveAndShot2)
+        if (validShot(validMove(board, move), shot)) {
+          const nextBoard = JSON.stringify(makeShot(makeMove(board, move), shot, 'b'))
           change.after.ref.update({
             board: nextBoard,
             state: 'player1_move',
-            lastMove1: null,
-            lastShot1: null,
+            lastMoveAndShot1: null,
           })
         } else {
           change.after.ref.update({
-            lastShot2: null,
+            lastMoveAndShot2: null,
           })
         }
       }
-
     }
 )
 
@@ -128,7 +82,7 @@ const makeShot = (board, shot, color) => {
   return board
 }
 
-const checkWin = (b, gameId) => {
+const checkWin = (b, game) => {
   const whiteQueens = []
   const blackQueens = []
 
@@ -145,10 +99,10 @@ const checkWin = (b, gameId) => {
   })
 
   if (!whiteQueens.map(c => isStuck(c, b)).includes(false)) {
-    firestore().collection('games').doc(gameId).update({state: 'player2_wins'})
+    game.update({state: 'player2_wins'})
     return true
   } else if (!blackQueens.map(c => isStuck(c,b)).includes(false)) {
-    firestore().collection('games').doc(gameId).update({state: 'player1_wins'})
+    game.update({state: 'player1_wins'})
     return true
   }
 }

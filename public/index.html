@@ -3,9 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to FirebaseRTC</title>
+    <title>Hippolyta - Game of the Amazons</title>
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.3.1/luxon.min.js" integrity="sha512-Nw0Abk+Ywwk5FzYTxtB70/xJRiCI0S2ORbXI3VBlFpKJ44LM6cW2WxIIolyKEOxOuMI90GIfXdlZRJepu7cczA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <!-- update the version number as needed -->
@@ -15,143 +16,160 @@
     <script src="/__/firebase/5.9.3/firebase-auth.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script src="/__/firebase/init.js"></script>
-
-    <script type="module">
-      const firebaseConfig = {
-        apiKey: "AIzaSyA-b92xdvZMaI0uh8opLc9S1_qh55HNixY",
-        authDomain: "hippolyta-game.firebaseapp.com",
-        projectId: "hippolyta-game",
-        storageBucket: "hippolyta-game.appspot.com",
-        messagingSenderId: "1061620854015",
-        appId: "1:1061620854015:web:c84f282a52f4ee420bf0ca"
-      };
-    </script>
     <link rel="stylesheet" type="text/css" href="main.css">
     <script src="svgs.js"></script>
 </head>
 <body>
 <nav>
-  <h1>Hippolyta - Game of the Amazons
+  <a href="/"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="45"
+height="45">
+<g style="fill:#000000;stroke:#000000;stroke-width:1.5; stroke-linecap:round;stroke-linejoin:round">
+
+  <path d="M 9,26 C 17.5,24.5 30,24.5 36,26 L 38.5,13.5 L 31,25 L 30.7,10.9 L 25.5,24.5 L 22.5,10 L 19.5,24.5 L 14.3,10.9 L 14,25 L 6.5,13.5 L 9,26 z"
+  style="stroke-linecap:butt;fill:#000000" />
+  <path d="m 9,26 c 0,2 1.5,2 2.5,4 1,1.5 1,1 0.5,3.5 -1.5,1 -1,2.5 -1,2.5 -1.5,1.5 0,2.5 0,2.5 6.5,1 16.5,1 23,0 0,0 1.5,-1 0,-2.5 0,0 0.5,-1.5 -1,-2.5 -0.5,-2.5 -0.5,-2 0.5,-3.5 1,-2 2.5,-2 2.5,-4 -8.5,-1.5 -18.5,-1.5 -27,0 z" />
+  <path d="M 11.5,30 C 15,29 30,29 33.5,30" />
+  <path d="m 12,33.5 c 6,-1 15,-1 21,0" />
+  <circle cx="6" cy="12" r="2" />
+  <circle cx="14" cy="9" r="2" />
+  <circle cx="22.5" cy="8" r="2" />
+  <circle cx="31" cy="9" r="2" />
+  <circle cx="39" cy="12" r="2" />
+  <path d="M 11,38.5 A 35,35 1 0 0 34,38.5"
+  style="fill:none; stroke:#000000;stroke-linecap:butt;" />
+  <g style="fill:none; stroke:#ffffff;">
+    <path d="M 11,29 A 35,35 1 0 1 34,29" />
+    <path d="M 12.5,31.5 L 32.5,31.5" />
+    <path d="M 11.5,34.5 A 35,35 1 0 0 33.5,34.5" />
+    <path d="M 10.5,37.5 A 35,35 1 0 0 34.5,37.5" />
+  </g>
+</g>
+</svg></a><h1>Hippolyta</h1><h2>Game of the Amazons</h2>
 </nav>
-<div id="buttons">
-    <button class="mdc-button mdc-button--raised hidden" id="createBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">bolt</i>
-        <span class="mdc-button__label">real-time game</span>
-    </button>
-    <button class="mdc-button mdc-button--raised" id="createDailyBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">light_mode</i>
-        <span class="mdc-button__label">daily game</span>
-    </button>
-    <button class="mdc-button mdc-button--raised hidden" id="hangupBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
-        <span class="mdc-button__label">Leave</span>
-    </button>
-    <button class="mdc-button mdc-button--raised hidden" id="leaveDailyBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
-        <span class="mdc-button__label">Leave</span>
-    </button>
-    <button class="mdc-button mdc-button--raised" id="refreshBtn">
-        <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
-        <span class="mdc-button__label">Refresh Games</span>
-    </button>
-    <button class="mdc-button mdc-button--raised hidden" id="playAsWhite">
-        <span class="mdc-button__label">play as white</span>
-    </button>
-    <button class="mdc-button mdc-button--raised hidden" id="playAsBlack">
-        <span class="mdc-button__label">play as black</span>
-    </button>
-    <button class="mdc-button mdc-button--raised hidden" id="playAsRandom">
-        <span class="mdc-button__label">play as random</span>
-    </button>
-</div>
-<div>
-    <span id="currentRoom"></span>
-</div>
-<div id="rooms" class="module hidden">
-  <label>Real Time Games</label>
-  <ul>
-  </ul>
-</div>
-<div id="dailies" class="module">
-  <label>Daily Games</label>
-  <ul>
-  </ul>
-</div>
-<div id="mydailies" class="module">
-  <label>My Daily Games</label>
-  <ul>
-  </ul>
-</div>
-
-<div id="game" class="hidden">
-  <div id="board" ></div>
-  <div id="player1" class="active"></div>
-  <div id="player2"></div>
-  <div id="chat">
-    <div id="chatLog"></div>
-    <input type="text" id="chatEntry" />
+<container>
+  <div id="buttons">
+      <button class="mdc-button mdc-button--raised hidden" id="signInBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
+          <span class="mdc-button__label">Sign in</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="createBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">bolt</i>
+          <span class="mdc-button__label">real-time game</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="createDailyBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">light_mode</i>
+          <span class="mdc-button__label">daily game</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="hangupBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
+          <span class="mdc-button__label">Leave</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="leaveDailyBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">close</i>
+          <span class="mdc-button__label">Leave</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="refreshBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
+          <span class="mdc-button__label">Refresh Games</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="playAsWhite">
+          <span class="mdc-button__label">play as white</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="playAsBlack">
+          <span class="mdc-button__label">play as black</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="playAsRandom">
+          <span class="mdc-button__label">play as random</span>
+      </button>
   </div>
-</div>
+  <div>
+      <span id="currentRoom"></span>
+  </div>
+  <div id="rooms" class="module hidden">
+    <label>Real Time Games</label>
+    <ul>
+    </ul>
+  </div>
+  <div id="dailies" class="module">
+    <label>Daily Games</label>
+    <ul>
+    </ul>
+  </div>
+  <div id="mydailies" class="module">
+    <label>My Daily Games</label>
+    <ul>
+    </ul>
+  </div>
 
-
-<div class="mdc-dialog"
-     id="room-dialog"
-     role="alertdialog"
-     aria-modal="true"
-     aria-labelledby="my-dialog-title"
-     aria-describedby="my-dialog-content">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="my-dialog-title">Join room</h2>
-            <div class="mdc-dialog__content" id="my-dialog-content">
-                Enter ID for room to join:
-                <div class="mdc-text-field">
-                    <input type="text" id="room-id" class="mdc-text-field__input">
-                    <label class="mdc-floating-label" for="my-text-field">Room ID</label>
-                    <div class="mdc-line-ripple"></div>
-                </div>
-            </div>
-            <footer class="mdc-dialog__actions">
-                <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no">
-                    <span class="mdc-button__label">Cancel</span>
-                </button>
-                <button id="confirmJoinBtn" type="button" class="mdc-button mdc-dialog__button"
-                        data-mdc-dialog-action="yes">
-                    <span class="mdc-button__label">Join</span>
-                </button>
-            </footer>
-        </div>
+  <div id="game" class="hidden">
+    <div id="board" ></div>
+    <div id="player1" class="active"></div>
+    <div id="player2"></div>
+    <div id="chat">
+      <div id="chatLog"></div>
+      <input type="text" id="chatEntry" />
     </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
+  </div>
 
-<div class="mdc-dialog"
-     id="name-dialog"
-     role="alertdialog"
-     aria-modal="true"
-     aria-labelledby="my-dialog-title"
-     aria-describedby="my-dialog-content">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="my-dialog-title">Enter your name</h2>
-            <div class="mdc-dialog__content" id="my-dialog-content">
-                Enter your name:
-                <div class="mdc-text-field">
-                    <input type="text" id="user-name" class="mdc-text-field__input">
-                    <div class="mdc-line-ripple"></div>
-                </div>
-            </div>
-            <footer class="mdc-dialog__actions">
-                <button id="submitName" type="button" class="mdc-button mdc-dialog__button"
-                        data-mdc-dialog-action="yes">
-                    <span class="mdc-button__label">Submit</span>
-                </button>
-            </footer>
-        </div>
-    </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
 
+  <div class="mdc-dialog"
+       id="room-dialog"
+       role="alertdialog"
+       aria-modal="true"
+       aria-labelledby="my-dialog-title"
+       aria-describedby="my-dialog-content">
+      <div class="mdc-dialog__container">
+          <div class="mdc-dialog__surface">
+              <h2 class="mdc-dialog__title" id="my-dialog-title">Join room</h2>
+              <div class="mdc-dialog__content" id="my-dialog-content">
+                  Enter ID for room to join:
+                  <div class="mdc-text-field">
+                      <input type="text" id="room-id" class="mdc-text-field__input">
+                      <label class="mdc-floating-label" for="my-text-field">Room ID</label>
+                      <div class="mdc-line-ripple"></div>
+                  </div>
+              </div>
+              <footer class="mdc-dialog__actions">
+                  <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no">
+                      <span class="mdc-button__label">Cancel</span>
+                  </button>
+                  <button id="confirmJoinBtn" type="button" class="mdc-button mdc-dialog__button"
+                          data-mdc-dialog-action="yes">
+                      <span class="mdc-button__label">Join</span>
+                  </button>
+              </footer>
+          </div>
+      </div>
+      <div class="mdc-dialog__scrim"></div>
+  </div>
+
+  <div class="mdc-dialog"
+       id="name-dialog"
+       role="alertdialog"
+       aria-modal="true"
+       aria-labelledby="my-dialog-title"
+       aria-describedby="my-dialog-content">
+      <div class="mdc-dialog__container">
+          <div class="mdc-dialog__surface">
+              <h2 class="mdc-dialog__title" id="my-dialog-title">Enter your name</h2>
+              <div class="mdc-dialog__content" id="my-dialog-content">
+                  Enter your name:
+                  <div class="mdc-text-field">
+                      <input type="text" id="user-name" class="mdc-text-field__input">
+                      <div class="mdc-line-ripple"></div>
+                  </div>
+              </div>
+              <footer class="mdc-dialog__actions">
+                  <button id="submitName" type="button" class="mdc-button mdc-dialog__button"
+                          data-mdc-dialog-action="yes">
+                      <span class="mdc-button__label">Submit</span>
+                  </button>
+              </footer>
+          </div>
+      </div>
+      <div class="mdc-dialog__scrim"></div>
+  </div>
+</container>
 <script src="app.js"></script>
 <script src="backend.js"></script>
 </body>

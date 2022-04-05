@@ -6,6 +6,26 @@ body {
     padding: 0;
 }
 
+nav {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+  padding: 0 0.8rem;
+  margin: 0;
+  background-color: #ddd;
+  overflow: auto;
+}
+
+nav h1 {
+  margin: 0.8rem;
+  font-size: 1.2rem;
+}
+nav h2 {
+  margin: 0.8rem 0;
+  padding-top: 3px;
+  font-size: 0.8rem;
+  line-height: 1.2rem;
+  color: darkred;
+}
 .hidden {
   display: none;
 }
@@ -59,8 +79,9 @@ body {
     font-size: 13px;
 }
 
-body {
-    margin: 1em;
+container {
+  padding: 0.5rem;
+  display: block;
 }
 
 button {
@@ -82,14 +103,49 @@ div#videos > video {
 }
 
 .module {
-  padding: 1rem;
   border: 1px solid grey;
   margin-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.module label {
+  padding: 0.5rem;
+  background-color: #ccc;
+  display: block;
+  border-bottom: 1px solid black;
+  margin-bottom: 0.5rem;
+}
+
+#rooms ul, #dailies ul, #mydailies ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+#rooms ul li, #dailies ul li, #mydailies ul li {
+  display: flex;
 }
 
 #rooms ul li > span, #dailies ul li > span, #mydailies ul li > span {
-  width: 75%;
-  display: inline-block;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  margin: 0.5rem;
+}
+
+#rooms ul li > button, #dailies ul li > button, #mydailies ul li > button {
+  margin: 0.5rem;
+}
+
+.details {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.date {
+  flex-basis: 2rem;
+  text-align: center;
+  font-size: 0.8rem;
 }
 
 #chatLog {
@@ -112,12 +168,6 @@ div#videos > video {
   box-sizing: border-box;
 }
 
-.dailyJoinWrapper {
-  display: inline-block;
-  width: 200px;
-  text-align: center;
-}
-
 .square { border: 2px solid rgba(0,0,0,0.1);
   box-sizing: border-box; position: relative; }
 #board .influence { border: 2px solid black; }
@@ -130,7 +180,6 @@ div#videos > video {
 .darkener { background: rgba(0,0,0,0.08); position: absolute; top: 0;
   left: 0; bottom: 0; right: 0; pointer-events: none; }
 
-container { display: flex; flex-wrap: wrap; }
 svg { transform: scale(0.8); }
 
 #board { width: 100%; display: flex; flex-wrap: wrap; margin-top: 1rem; }
@@ -207,4 +256,8 @@ svg { transform: scale(0.8); }
 
 .lastMove, .lastShot {
   border: 2px solid yellow;
+}
+
+body button.mdc-button {
+    background-color: #8b0000 !important;
 }
