@@ -46,7 +46,9 @@ function init() {
   document.querySelector('#playAsBlack').addEventListener('click', () => playDailyGame('black'))
   document.querySelector('#playAsRandom').addEventListener('click', () => playDailyGame(Math.round(Math.random()) ? 'white' : 'black'))
   document.querySelector('#signInBtn').addEventListener('click', signIn)
-  firebase.firestore().settings({host: 'localhost:4102', ssl: false})
+  if (location.host === 'localhost') {
+    firebase.firestore().settings({host: 'localhost:4102', ssl: false})
+  }
   const unsub = firebase.auth().onAuthStateChanged(user => {
     unsub()
     if (user) {
