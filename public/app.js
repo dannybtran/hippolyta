@@ -23,11 +23,19 @@ let answererBecomingOfferer = false
 
 const db = firebase.firestore()
 
-const hide = (q) => {
+function hide(q) {
   document.querySelector(q).style.display = 'none';
 }
 
-const show = (q, d) => {
+function disable(q) {
+  document.querySelector(q).disabled = true;
+}
+
+function enable(q) {
+  document.querySelector(q).disabled = false;
+}
+
+function show(q, d) {
   const $e = document.querySelector(q)
   $e.classList.remove('hidden')
   $e.style.display = d || 'inline-block';
@@ -50,7 +58,7 @@ function init() {
   document.querySelector('#signInBtn').addEventListener('click', signIn)
   document.querySelector('#signOutBtn').addEventListener('click', signOut)
   document.querySelector('#moveHistory').addEventListener('click', (e) => { if (e.target.id === 'moveHistory') { handleGameSnap(currentGameSnap) } })
-  document.querySelector('#resetMoveBtn').addEventListener('click', (e) => { handleGameSnap(currentGameSnap); hide('#resetMoveBtn'); hide('#confirmMoveBtn'); })
+  document.querySelector('#resetMoveBtn').addEventListener('click', (e) => { handleGameSnap(currentGameSnap); disable('#resetMoveBtn'); disable('#confirmMoveBtn'); })
   if (location.hostname === 'localhost') {
     firebase.firestore().settings({host: 'localhost:4102', ssl: false})
   }
@@ -148,7 +156,7 @@ async function refreshRooms() {
     $i.innerText = 'group'
     const $span = document.createElement('span')
     $span.classList.add('mdc-button__label')
-    $span.innerText = 'Join game'
+    $span.innerText = 'Join'
     $button.appendChild($i)
     $button.appendChild($span)
     $button.addEventListener('click', (e) => { joinRoomById(r.id) })
@@ -243,10 +251,10 @@ async function refreshRooms() {
     $span.classList.add('mdc-button__label')
     if (g.state.includes("_wins")) {
       $i.innerText = 'visibility'
-      $span.innerText = 'View game'
+      $span.innerText = 'View'
     } else {
       $i.innerText = 'group'
-      $span.innerText = 'Join game'
+      $span.innerText = 'Join'
     }
     $button.appendChild($i)
     $button.appendChild($span)
@@ -600,7 +608,7 @@ async function moveToSquare(b, x, y, nx, ny, gameId, color) {
   b[ny][nx] = piece
   draw(b)
   activateShootTurn(color, b, lastMove, gameId)
-  show('#resetMoveBtn')
+  enable('#resetMoveBtn')
 }
 
 async function shootToSquare(b, x, y, nx, ny, gameId, color, lm) {
@@ -620,11 +628,11 @@ async function shootToSquare(b, x, y, nx, ny, gameId, color, lm) {
   skey = `s${lm.ny * b.length + lm.nx}`
   $square = document.getElementById(skey)
   $square.classList.add('lastMove')
-  show('#confirmMoveBtn')
+  enable('#confirmMoveBtn')
   $c2.addEventListener('click', async () => {
     dontDraw = true
-    hide('#resetMoveBtn')
-    hide('#confirmMoveBtn')
+    disable('#resetMoveBtn')
+    disable('#confirmMoveBtn')
     await firebase.firestore().collection('games').doc(gameId).update({[key]: JSON.stringify({
       move: lm,
       shot: {x,y,nx,ny},
@@ -669,6 +677,7 @@ async function hangUp(e) {
 }
 
 async function loadMoveHistory(moveHistory, board) {
+  if (!moveHistory) return;
   const mh = JSON.parse(moveHistory)
   const b = JSON.parse(board)
   const $mh = document.querySelector('#moveHistory')

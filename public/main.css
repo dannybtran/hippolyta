@@ -264,6 +264,18 @@ svg { transform: scale(0.8); }
   #side { width: 40%; padding-left: 1rem; }
   #pgn { font-size: 1rem; }
   #loadPgn { font-size: 1rem; }
+  body button.mdc-button {
+      flex-basis: auto !important;
+  }
+  #player1, #player2 { flex-basis: auto !important; }
+  #spacer { display: inline-block; }
+  #playerBar > *:first-child {
+    margin-left: 0;
+  }
+
+  #playerBar > *:last-child {
+    margin-right: 0;
+  }
 }
 
 /* @media screen and (min-width: 1024px) {
@@ -276,6 +288,8 @@ svg { transform: scale(0.8); }
   background-color: white !important;
   color: black;
   cursor: initial;
+  flex-basis: 48%;
+  margin: 1%;
 }
 
 #player1.active, #player2.active { opacity: 1; }
@@ -285,14 +299,26 @@ svg { transform: scale(0.8); }
   background-color: black !important;
   color: white;
   cursor: initial;
+  flex-basis: 48%;
+  margin: 1%;
 }
 
 .lastMove, .lastShot {
   border: 2px solid yellow;
 }
 
+body #mydailies button.mdc-button {
+    background-color: #8b0000 !important;
+    flex-basis: auto;
+    box-sizing: border-box;
+    margin: 1%;
+}
+
 body button.mdc-button {
     background-color: #8b0000 !important;
+    flex-basis: 48%;
+    box-sizing: border-box;
+    margin: 1%;
 }
 
 body button#confirmMoveBtn.mdc-button {
@@ -315,19 +341,19 @@ body button#resetMoveBtn.mdc-button {
   flex-basis: 100%;
   margin-bottom: 0.5rem;
   display: flex;
+  flex-wrap: wrap;
 }
 #playerBar .spacer {
   flex-grow: 1;
+  display: none;
 }
 
-#playerBar > * {
-  margin: 0 0.25rem;
+#buttons {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: left;
 }
 
-#playerBar > *:first-child {
-  margin-left: 0;
-}
-
-#playerBar > *:last-child {
-  margin-right: 0;
+#playerBar *[disabled] {
+  opacity: 0.05;
 }
