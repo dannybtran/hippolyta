@@ -20,10 +20,14 @@ exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
         const {move, shot} = JSON.parse(data.lastMoveAndShot1)
         if (validShot(validMove(board, move), shot)) {
           const nextBoard = JSON.stringify(makeShot(makeMove(board, move), shot, 'w'))
+          const moveHistory = JSON.parse(data.moveHistory || '[]')
+          const on = new Date().toISOString()
+          moveHistory.push({move, shot, on})
           change.after.ref.update({
             board: nextBoard,
             state: 'player2_move',
             lastMoveAndShot2: null,
+            moveHistory: JSON.stringify(moveHistory),
           })
         } else {
           change.after.ref.update({
@@ -37,10 +41,14 @@ exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
         const {move, shot} = JSON.parse(data.lastMoveAndShot2)
         if (validShot(validMove(board, move), shot)) {
           const nextBoard = JSON.stringify(makeShot(makeMove(board, move), shot, 'b'))
+          const moveHistory = JSON.parse(data.moveHistory || '[]')
+          const on = new Date().toISOString()
+          moveHistory.push({move, shot, on})
           change.after.ref.update({
             board: nextBoard,
             state: 'player1_move',
             lastMoveAndShot1: null,
+            moveHistory: JSON.stringify(moveHistory),
           })
         } else {
           change.after.ref.update({

@@ -81,6 +81,10 @@ height="45">
       <button class="mdc-button mdc-button--raised hidden" id="playAsRandom">
           <span class="mdc-button__label">play as random</span>
       </button>
+      <button class="mdc-button mdc-button--raised hidden" id="signOutBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
+          <span class="mdc-button__label">Sign out</span>
+      </button>
   </div>
   <div>
       <span id="currentRoom"></span>
@@ -102,9 +106,21 @@ height="45">
   </div>
 
   <div id="game" class="hidden">
+    <div id="playerBar">
+      <div id="player1" class="mdc-button"></div>
+      <div id="player2" class="mdc-button"></div>
+      <div class="spacer"></div>
+      <button class="mdc-button mdc-button--raised hidden" id="resetMoveBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
+          <span class="mdc-button__label">Reset Move</span>
+      </button>
+      <button class="mdc-button mdc-button--raised hidden" id="confirmMoveBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
+          <span class="mdc-button__label">Confirm move</span>
+      </button>
+    </div>
     <div id="board" ></div>
-    <div id="player1" class="active"></div>
-    <div id="player2"></div>
+    <div id="moveHistory" class="hidden"></div>
     <div id="chat">
       <div id="chatLog"></div>
       <input type="text" id="chatEntry" />
@@ -171,6 +187,5 @@ height="45">
   </div>
 </container>
 <script src="app.js"></script>
-<script src="backend.js"></script>
 </body>
 </html>

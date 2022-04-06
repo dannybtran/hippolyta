@@ -148,11 +148,48 @@ div#videos > video {
   font-size: 0.8rem;
 }
 
+#moveHistory {
+  padding: 1rem;
+  border: 1px solid grey;
+  flex-basis: 100%;
+  height: auto;
+  margin: 0 0 0 auto;
+  display: flex;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  overflow-y: scroll;
+  align-content: start;
+}
+
+#moveHistory div {
+  border: 1px solid grey;
+  margin: 1%;
+  padding: 0 1%;
+  flex-basis: 48%;
+  height: 2rem;
+  box-sizing: border-box;
+  line-height: 2rem;
+  cursor: pointer;
+}
+
+#moveHistory div.selected {
+  border: 2px solid cornflowerblue;
+}
+
+#moveHistory .p2 {
+  background-color: #555;
+  color: white;
+}
+
+#chat {
+  flex-basis: 100%;
+
+}
 #chatLog {
   padding: 1rem;
   border: 1px solid grey;
   width: 100%;
-  height: 400px;
+  height: 250px;
   margin-top: 1rem;
   display: inline-block;
   box-sizing: border-box;
@@ -182,7 +219,7 @@ div#videos > video {
 
 svg { transform: scale(0.8); }
 
-#board { width: 100%; display: flex; flex-wrap: wrap; margin-top: 1rem; }
+#board { width: 100%; display: flex; flex-wrap: wrap; margin-bottom: 0.5rem;  }
 
 .square.highlight {
   border: 2px solid green;
@@ -219,7 +256,8 @@ svg { transform: scale(0.8); }
 }
 
 @media screen and (min-width: 768px) {
-  #board { width: 50%; }
+  #board { flex-basis: 50%; margin-bottom: 0; }
+  #moveHistory { flex-basis: 48%; }
   #top { font-size: 1rem; margin-top: 1rem; }
   #fen { font-size: 1rem; }
   #load { font-size: 1rem; }
@@ -228,30 +266,25 @@ svg { transform: scale(0.8); }
   #loadPgn { font-size: 1rem; }
 }
 
-@media screen and (min-width: 1024px) {
-  #board { width: 40%; }
+/* @media screen and (min-width: 1024px) {
+  #board { flex-basis: 40%; }
   svg { transform: scale(1); }
-}
+} */
 
 #player1 {
-  padding: 1rem;
-  margin: 1rem;
-  border: 1px solid black;
-  background-color: white;
-  display: inline-block;
   opacity: 0.08;
+  background-color: white !important;
+  color: black;
+  cursor: initial;
 }
 
-#player1.active, #player2.active { opacity: 1 }
+#player1.active, #player2.active { opacity: 1; }
 
 #player2 {
-  padding: 1rem;
-  margin: 1rem;
-  border: 1px solid black;
-  background-color: black;
-  color: white;
-  display: inline-block;
   opacity: 0.08;
+  background-color: black !important;
+  color: white;
+  cursor: initial;
 }
 
 .lastMove, .lastShot {
@@ -260,4 +293,41 @@ svg { transform: scale(0.8); }
 
 body button.mdc-button {
     background-color: #8b0000 !important;
+}
+
+body button#confirmMoveBtn.mdc-button {
+    background-color: green !important;
+}
+
+body button#resetMoveBtn.mdc-button {
+    background-color: grey !important;
+}
+
+#game.hidden {
+  display: none;
+
+}
+#game {
+  display: flex;
+  flex-wrap: wrap;
+}
+#playerBar {
+  flex-basis: 100%;
+  margin-bottom: 0.5rem;
+  display: flex;
+}
+#playerBar .spacer {
+  flex-grow: 1;
+}
+
+#playerBar > * {
+  margin: 0 0.25rem;
+}
+
+#playerBar > *:first-child {
+  margin-left: 0;
+}
+
+#playerBar > *:last-child {
+  margin-right: 0;
 }

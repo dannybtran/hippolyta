@@ -21,6 +21,8 @@ let userName = 'Guest'
 let oppoName = 'Opponent'
 let answererBecomingOfferer = false
 
+const db = firebase.firestore()
+
 const hide = (q) => {
   document.querySelector(q).style.display = 'none';
 }
@@ -46,7 +48,10 @@ function init() {
   document.querySelector('#playAsBlack').addEventListener('click', () => playDailyGame('black'))
   document.querySelector('#playAsRandom').addEventListener('click', () => playDailyGame(Math.round(Math.random()) ? 'white' : 'black'))
   document.querySelector('#signInBtn').addEventListener('click', signIn)
-  if (location.host === 'localhost') {
+  document.querySelector('#signOutBtn').addEventListener('click', signOut)
+  document.querySelector('#moveHistory').addEventListener('click', (e) => { if (e.target.id === 'moveHistory') { handleGameSnap(currentGameSnap) } })
+  document.querySelector('#resetMoveBtn').addEventListener('click', (e) => { handleGameSnap(currentGameSnap); hide('#resetMoveBtn'); hide('#confirmMoveBtn'); })
+  if (location.hostname === 'localhost') {
     firebase.firestore().settings({host: 'localhost:4102', ssl: false})
   }
   const unsub = firebase.auth().onAuthStateChanged(user => {
@@ -54,6 +59,7 @@ function init() {
     if (user) {
       show('#createDailyBtn')
       show('#refreshBtn')
+      show('#signOutBtn')
     } else {
       show('#signInBtn')
     }
@@ -65,11 +71,19 @@ async function signIn() {
   hide('#signInBtn')
   show('#createDailyBtn')
   show('#refreshBtn')
+  show('#signOutBtn')
+}
+
+async function signOut() {
+  await firebase.auth().signOut()
+  hide('#signOutBtn')
+  hide('#createDailyBtn')
+  hide('#refreshBtn')
+  show('#signInBtn')
 }
 
 async function signInAndSaveUser() {
   const result = await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-  const db = firebase.firestore()
   let user
   user = await db.collection('users').doc(firebase.auth().getUid())
   if (!user) {
@@ -86,6 +100,7 @@ async function createDailyGame() {
   hide('#createBtn')
   hide('#createDailyBtn')
   hide('#refreshBtn')
+  hide('#signOutBtn')
   show('#playAsBlack')
   show('#playAsWhite')
   show('#playAsRandom')
@@ -119,7 +134,6 @@ async function submitName() {
 
 async function refreshRooms() {
   const $list = document.querySelector('#rooms ul')
-  const db = firebase.firestore();
   const rooms = await db.collection('rooms').get()
   $list.innerHTML = ''
   rooms.docs.forEach(r => {
@@ -248,7 +262,6 @@ async function createRoom(roomId) {
   hide('#refreshBtn')
   hide('#leaveDailyBtn')
   show('#hangupBtn')
-  const db = firebase.firestore()
 
   let roomRef
   const roomExists = !!roomId
@@ -333,7 +346,6 @@ async function joinRoomById(roomId) {
   document.querySelector(
       '#currentRoom').innerText = `Current room is ${roomId} - You are the callee!`;
 
-  const db = firebase.firestore()
   const roomRef = db.collection('rooms').doc(`${roomId}`);
   const roomSnapshot = await roomRef.get();
 
@@ -386,7 +398,6 @@ async function joinRoomById(roomId) {
 
 async function joinDailyById(gameId) {
   if (!firebase.auth().currentUser) { await signInAndSaveUser() }
-  const db = firebase.firestore()
   const game = await db.collection('games').doc(gameId)
   const data = (await game.get()).data()
   await game.update({
@@ -399,15 +410,15 @@ async function joinDailyById(gameId) {
 
 let dontDraw = false
 let unsubGame
+let currentGameSnap
 
 async function gotoDailyById(gameId) {
-  show('#game')
+  show('#game', 'flex')
   if (!firebase.auth().currentUser) { await signInAndSaveUser() }
   const $board = document.querySelector('#board')
   $board.innerHTML = '' // clear the existing chess board HTML
   const $chatLog = document.querySelector('#chatLog')
   $chatLog.innerText = ''
-  const db = firebase.firestore()
   const $p1 = document.querySelector('#player1')
   const $p2 = document.querySelector('#player2')
   const game = await db.collection('games').doc(gameId)
@@ -425,50 +436,7 @@ async function gotoDailyById(gameId) {
   } else {
     $p2.innerText = 'Waiting'
   }
-  game.onSnapshot(async (data) => {
-    const d = data.data()
-    if (d.board && !dontDraw) {
-      draw(JSON.parse(d.board))
-    }
-    dontDraw = false
-    if (d.player2 && $p2.innerText === 'Waiting') {
-      const p2 = await db.collection('users').doc(d.player2).get()
-      $p2.innerText = p2.data().name
-    }
-    if (d.player1 && $p1.innerText === 'Waiting') {
-      const p1 = await db.collection('users').doc(d.player1).get()
-      $p1.innerText = p1.data().name
-    }
-    if (d.state === 'player1_move') {
-      $p1.classList.add('active')
-      $p2.classList.remove('active')
-      if (player1 === firebase.auth().getUid() && d.lastMoveAndShot1 === null) {
-        await activateMoveTurn('w', d.board, gameId)
-      }
-      showLastMoveAndShot(d.board, d.lastMoveAndShot2)
-    } else if (d.state === 'player2_move') {
-      $p2.classList.add('active')
-      $p1.classList.remove('active')
-      if (player2 === firebase.auth().getUid() && d.lastMoveAndShot2 === null) {
-        await activateMoveTurn('b', d.board, gameId)
-      }
-      showLastMoveAndShot(d.board, d.lastMoveAndShot1)
-    } else if (d.state === 'player1_wins') {
-      addChatMsg('White wins!')
-      Array.from(document.getElementsByClassName('highlight')).forEach($e =>
-        $e.classList.remove('highlight')
-      )
-      abort.abort()
-      draw(JSON.parse(d.board))
-    } else if (d.state === 'player2_wins') {
-      addChatMsg('Black wins!')
-      Array.from(document.getElementsByClassName('highlight')).forEach($e =>
-        $e.classList.remove('highlight')
-      )
-      abort.abort()
-      draw(JSON.parse(d.board))
-    }
-  })
+  game.onSnapshot(handleGameSnap)
   hide('#rooms')
   hide('#dailies')
   hide('#mydailies')
@@ -476,10 +444,64 @@ async function gotoDailyById(gameId) {
   hide('#createDailyBtn')
   hide('#refreshBtn')
   hide('#leaveDailyBtn')
-  show('#game', 'block')
+  hide('#signOutBtn')
+  show('#game', 'flex')
 }
 
 let abort
+
+async function handleGameSnap(data) {
+  const $p1 = document.querySelector('#player1')
+  const $p2 = document.querySelector('#player2')
+  currentGameSnap = data
+  const d = data.data()
+  if (d.board && !dontDraw) {
+    draw(JSON.parse(d.board))
+  }
+
+  if (d.player2 && $p2.innerText === 'Waiting') {
+    const p2 = await db.collection('users').doc(d.player2).get()
+    $p2.innerText = p2.data().name
+  }
+  if (d.player1 && $p1.innerText === 'Waiting') {
+    const p1 = await db.collection('users').doc(d.player1).get()
+    $p1.innerText = p1.data().name
+  }
+  if (d.state === 'player1_move') {
+    $p1.classList.add('active')
+    $p2.classList.remove('active')
+    if (d.player1 === firebase.auth().getUid() && d.lastMoveAndShot1 === null) {
+      await activateMoveTurn('w', d.board, data.id)
+    }
+    loadMoveHistory(d.moveHistory, d.board)
+    if (!dontDraw) { showLastMoveAndShot(d.board, d.lastMoveAndShot2) }
+  } else if (d.state === 'player2_move') {
+    $p2.classList.add('active')
+    $p1.classList.remove('active')
+    if (d.player2 === firebase.auth().getUid() && d.lastMoveAndShot2 === null) {
+      await activateMoveTurn('b', d.board, data.id)
+    }
+    loadMoveHistory(d.moveHistory, d.board)
+    if (!dontDraw) { showLastMoveAndShot(d.board, d.lastMoveAndShot1) }
+  } else if (d.state === 'player1_wins') {
+    addChatMsg('White wins!')
+    Array.from(document.getElementsByClassName('highlight')).forEach($e =>
+      $e.classList.remove('highlight')
+    )
+    if (abort) abort.abort()
+    draw(JSON.parse(d.board))
+    loadMoveHistory(d.moveHistory, d.board)
+  } else if (d.state === 'player2_wins') {
+    addChatMsg('Black wins!')
+    Array.from(document.getElementsByClassName('highlight')).forEach($e =>
+      $e.classList.remove('highlight')
+    )
+    if (abort) abort.abort()
+    draw(JSON.parse(d.board))
+    loadMoveHistory(d.moveHistory, d.board)
+  }
+  dontDraw = false
+}
 
 async function showLastMoveAndShot(board, moveAndShot) {
   if (!moveAndShot) return;
@@ -522,7 +544,7 @@ async function activateShootTurn(color, b, lm, gameId) {
   const y = lm.ny
   const key = `s${y * b.length + x}`
   const $square = document.getElementById(key)
-  $square.classList.add('selected')
+  $square.classList.add('lastMove')
   highlightPossibleShootSquares(b, x, y, gameId, color, lm)
 }
 
@@ -578,6 +600,7 @@ async function moveToSquare(b, x, y, nx, ny, gameId, color) {
   b[ny][nx] = piece
   draw(b)
   activateShootTurn(color, b, lastMove, gameId)
+  show('#resetMoveBtn')
 }
 
 async function shootToSquare(b, x, y, nx, ny, gameId, color, lm) {
@@ -588,11 +611,25 @@ async function shootToSquare(b, x, y, nx, ny, gameId, color, lm) {
   const key = color === 'w' ? 'lastMoveAndShot1' : 'lastMoveAndShot2'
   b[ny][nx] = {color: color, type: 'a'}
   draw(b)
-  dontDraw = true
-  await firebase.firestore().collection('games').doc(gameId).update({[key]: JSON.stringify({
-    move: lm,
-    shot: {x,y,nx,ny},
-  })})
+  const $c1 = document.querySelector('#confirmMoveBtn')
+  const $c2 = $c1.cloneNode(true)
+  $c1.parentNode.replaceChild($c2, $c1)
+  let skey = `s${ny * b.length + nx}`
+  let $square = document.getElementById(skey)
+  $square.classList.add('lastMove')
+  skey = `s${lm.ny * b.length + lm.nx}`
+  $square = document.getElementById(skey)
+  $square.classList.add('lastMove')
+  show('#confirmMoveBtn')
+  $c2.addEventListener('click', async () => {
+    dontDraw = true
+    hide('#resetMoveBtn')
+    hide('#confirmMoveBtn')
+    await firebase.firestore().collection('games').doc(gameId).update({[key]: JSON.stringify({
+      move: lm,
+      shot: {x,y,nx,ny},
+    })})
+  })
 }
 
 async function leaveDaily(e) {
@@ -616,7 +653,6 @@ async function hangUp(e) {
 
   // Delete room on hangup
   if (roomId) {
-    const db = firebase.firestore()
     const roomRef = db.collection('rooms').doc(roomId);
     const calleeCandidates = await roomRef.collection('calleeCandidates').get();
     calleeCandidates.forEach(async candidate => {
@@ -630,6 +666,43 @@ async function hangUp(e) {
   }
 
   document.location.reload(true);
+}
+
+async function loadMoveHistory(moveHistory, board) {
+  const mh = JSON.parse(moveHistory)
+  const b = JSON.parse(board)
+  const $mh = document.querySelector('#moveHistory')
+  $mh.innerHTML = ''
+  mh.forEach((m, i) => {
+    const turn = i%2 === 0 ? 1 : 2
+    const { move, shot } = m
+    const $m = document.createElement('div')
+    if (turn === 2) { $m.classList.add('p2') }
+    $m.innerHTML = `${String.fromCharCode(97+move.x)}${b.length-move.y}&hyphen;${String.fromCharCode(97+move.nx)}${b.length-move.ny} => ${String.fromCharCode(97+shot.nx)}${b.length-shot.ny}`
+    $m.addEventListener('click', showMoveAt.bind(null, i, mh, b, $m))
+    $mh.appendChild($m)
+  })
+  show('#moveHistory', 'flex')
+}
+
+
+async function showMoveAt(i, mh, b, $m) {
+  let $selected = document.querySelector('#moveHistory > div.selected') || []
+  $selected = Array.isArray($selected) ? $selected : [$selected]
+  $selected.forEach($e => $e.classList.remove('selected'))
+  $m.classList.add('selected')
+  const nb = freshBoard(b)
+  for(var k = 0; k <= i; k++) {
+    const { move, shot } = mh[k]
+    const piece = nb[move.y][move.x]
+    nb[move.y][move.x] = null
+    nb[move.ny][move.nx] = piece
+    const color = i%2 === 0 ? 'w' : 'b'
+    const type = 'a'
+    nb[shot.ny][shot.nx] = {color, type}
+  }
+  draw(nb)
+  showLastMoveAndShot(JSON.stringify(b), JSON.stringify(mh[i]))
 }
 
 function registerPeerConnectionListeners() {
@@ -651,6 +724,7 @@ function registerPeerConnectionListeners() {
 async function addChatMsg(msg) {
   document.querySelector('#chatLog').innerText += `\n${msg}`
 }
+
 let prevBoardString
 async function draw(board) {
   if (JSON.stringify(board) == prevBoardString) return
@@ -688,6 +762,17 @@ async function draw(board) {
       }
     })
   })
+}
+
+function freshBoard() {
+  return [
+    [null, null, null, {color: 'b', type: 'q'}, null, null],
+    [null, null, null, null, null, null],
+    [{color: 'w', type: 'q'}, null, null, null, null, null],
+    [null, null, null, null, null, {color: 'w', type: 'q'}],
+    [null, null, null, null, null, null],
+    [null, null, {color: 'b', type: 'q'}, null, null, null],
+  ]
 }
 
 init()
