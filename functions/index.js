@@ -6,7 +6,7 @@ exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
       const data = change.after.data()
       if (data.player1 && data.player2 && !data.board) {
         change.after.ref.update({
-          board: newBoard(),
+          board: newBoard(data.boardSize || 6),
           state: 'player1_move',
           lastMoveAndShot1: null,
           lastMoveAndShot2: null,
@@ -59,16 +59,33 @@ exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
     }
 )
 
-const newBoard = () => (JSON.stringify(
-  [
-    [null, null, null, {color: 'b', type: 'q'}, null, null],
-    [null, null, null, null, null, null],
-    [{color: 'w', type: 'q'}, null, null, null, null, null],
-    [null, null, null, null, null, {color: 'w', type: 'q'}],
-    [null, null, null, null, null, null],
-    [null, null, {color: 'b', type: 'q'}, null, null, null],
-  ]
-))
+const newBoard = (size) => {
+  let b
+  if (size === '6') {
+    b = [
+      [null, null, null, {color: 'b', type: 'q'}, null, null],
+      [null, null, null, null, null, null],
+      [{color: 'w', type: 'q'}, null, null, null, null, null],
+      [null, null, null, null, null, {color: 'w', type: 'q'}],
+      [null, null, null, null, null, null],
+      [null, null, {color: 'b', type: 'q'}, null, null, null],
+    ]
+  } else {
+    b = [
+      [null, null, null, {color: 'b', type: 'q'}, null, null, {color: 'b', type: 'q'}, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [{color: 'b', type: 'q'}, null, null, null, null, null, null, null, null, {color: 'b', type: 'q'}],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [{color: 'w', type: 'q'}, null, null, null, null, null, null, null, null, {color: 'w', type: 'q'}],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, {color: 'w', type: 'q'}, null, null, {color: 'w', type: 'q'}, null, null, null],
+    ]
+  }
+  return JSON.stringify(b);
+}
 
 const validMove = (board, move) => {
   return true

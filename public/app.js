@@ -1,4 +1,4 @@
-mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'))
+Array.from(document.querySelectorAll('.mdc-button')).forEach($e => mdc.ripple.MDCRipple.attachTo($e))
 
 const configuration = {
   iceServers: [
@@ -52,13 +52,11 @@ function init() {
   // nameDialog.open()
   document.querySelector('#submitName').addEventListener('click', submitName)
   document.querySelector('#user-name').addEventListener('keypress', typeUserName)
-  document.querySelector('#playAsWhite').addEventListener('click', () => playDailyGame('white'))
-  document.querySelector('#playAsBlack').addEventListener('click', () => playDailyGame('black'))
-  document.querySelector('#playAsRandom').addEventListener('click', () => playDailyGame(Math.round(Math.random()) ? 'white' : 'black'))
   document.querySelector('#signInBtn').addEventListener('click', signIn)
   document.querySelector('#signOutBtn').addEventListener('click', signOut)
   document.querySelector('#moveHistory').addEventListener('click', (e) => { if (e.target.id === 'moveHistory') { handleGameSnap(currentGameSnap) } })
   document.querySelector('#resetMoveBtn').addEventListener('click', (e) => { handleGameSnap(currentGameSnap); disable('#resetMoveBtn'); disable('#confirmMoveBtn'); })
+  document.querySelector('#startGameBtn').addEventListener('click', startGame)
   if (location.hostname === 'localhost') {
     firebase.firestore().settings({host: 'localhost:4102', ssl: false})
   }
@@ -109,21 +107,22 @@ async function createDailyGame() {
   hide('#createDailyBtn')
   hide('#refreshBtn')
   hide('#signOutBtn')
-  show('#playAsBlack')
-  show('#playAsWhite')
-  show('#playAsRandom')
+  show('#playAs', 'flex')
+  show('#boardSize', 'flex')
+  show('#startGameBtn')
 }
 
-async function playDailyGame(color) {
-  hide('#playAsBlack')
-  hide('#playAsWhite')
-  hide('#playAsRandom')
+async function playDailyGame(color, size) {
+  hide('#playAs')
+  hide('#boardSize')
+  hide('#startGameBtn')
   const game = await firebase.firestore().collection('games').doc()
   await game.set({
     creatorId: firebase.auth().getUid(),
     player1: color === 'white' ? firebase.auth().getUid() : null,
     player2: color === 'black' ? firebase.auth().getUid() : null,
     state: 'waitingForOpponent',
+    boardSize: size,
     createdOn: new Date().toISOString(),
   })
   gotoDailyById(game.id)
@@ -181,19 +180,24 @@ async function refreshRooms() {
     $i.innerText = 'group'
     const $span = document.createElement('span')
     $span.classList.add('mdc-button__label')
-
+    const $size = document.createElement('span')
+    $size.classList.add('boardSize')
+    $size.innerText = `${r.data().boardSize}x${r.data().boardSize}`
+    $item.appendChild($size)
     if (player1 === firebase.auth().getUid() || player2 === firebase.auth().getUid()) { return }
 
     if (player1 && !player2) {
       const user = await db.collection('users').doc(player1).get()
       $p1.innerText = user.data().name
-      $span.innerText = 'Join as black'
+      $span.innerText = 'Join'
+      $button.classList.add('black')
       $item.appendChild($p1)
       $item.appendChild($button)
     } else if (player2 && !player1) {
       const user = await db.collection('users').doc(player2).get()
       $p2.innerText = user.data().name
-      $span.innerText = 'Join as white'
+      $span.innerText = 'Join'
+      $button.classList.add('white')
       $item.appendChild($button)
       $item.appendChild($p2)
     } else if (player1 && player2) {
@@ -414,6 +418,12 @@ async function joinDailyById(gameId) {
     player2: data.player2 || firebase.auth().getUid(),
   })
   gotoDailyById(gameId)
+}
+
+async function startGame() {
+  const color = Array.from(document.querySelectorAll('input[name=color]')).filter($i => $i.checked)[0].value
+  const size = Array.from(document.querySelectorAll('input[name=boardSize]')).filter($i => $i.checked)[0].value
+  playDailyGame(color, size)
 }
 
 let dontDraw = false
@@ -696,8 +706,7 @@ async function loadMoveHistory(moveHistory, board) {
 
 
 async function showMoveAt(i, mh, b, $m) {
-  let $selected = document.querySelector('#moveHistory > div.selected') || []
-  $selected = Array.isArray($selected) ? $selected : [$selected]
+  let $selected = Array.from(document.querySelectorAll('#moveHistory > div.selected'))
   $selected.forEach($e => $e.classList.remove('selected'))
   $m.classList.add('selected')
   const nb = freshBoard(b)
@@ -773,15 +782,30 @@ async function draw(board) {
   })
 }
 
-function freshBoard() {
-  return [
-    [null, null, null, {color: 'b', type: 'q'}, null, null],
-    [null, null, null, null, null, null],
-    [{color: 'w', type: 'q'}, null, null, null, null, null],
-    [null, null, null, null, null, {color: 'w', type: 'q'}],
-    [null, null, null, null, null, null],
-    [null, null, {color: 'b', type: 'q'}, null, null, null],
-  ]
+function freshBoard(b) {
+  if (b.length === 6) {
+    return [
+      [null, null, null, {color: 'b', type: 'q'}, null, null],
+      [null, null, null, null, null, null],
+      [{color: 'w', type: 'q'}, null, null, null, null, null],
+      [null, null, null, null, null, {color: 'w', type: 'q'}],
+      [null, null, null, null, null, null],
+      [null, null, {color: 'b', type: 'q'}, null, null, null],
+    ]
+  } else {
+    return [
+      [null, null, null, {color: 'b', type: 'q'}, null, null, {color: 'b', type: 'q'}, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [{color: 'b', type: 'q'}, null, null, null, null, null, null, null, null, {color: 'b', type: 'q'}],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [{color: 'w', type: 'q'}, null, null, null, null, null, null, null, null, {color: 'w', type: 'q'}],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, {color: 'w', type: 'q'}, null, null, {color: 'w', type: 'q'}, null, null, null],
+    ]
+  }
 }
 
 init()

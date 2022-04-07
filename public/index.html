@@ -72,15 +72,80 @@ height="45">
           <i class="material-icons mdc-button__icon" aria-hidden="true">refresh</i>
           <span class="mdc-button__label">Refresh</span>
       </button>
-      <button class="mdc-button mdc-button--raised hidden" id="playAsWhite">
-          <span class="mdc-button__label">play as white</span>
+      <div class="flex hidden" id="playAs">
+        <h2>Play As</h2>
+
+        <div class="mdc-form-field" id="playAsBlack">
+          <div class="mdc-radio">
+            <input class="mdc-radio__native-control" type="radio" id="whiteValue" name="color" value="white" checked>
+            <div class="mdc-radio__background">
+              <div class="mdc-radio__outer-circle"></div>
+              <div class="mdc-radio__inner-circle"></div>
+            </div>
+            <div class="mdc-radio__ripple"></div>
+            <div class="mdc-radio__focus-ring"></div>
+          </div>
+          <label for="color">White</label>
+        </div>
+
+        <div class="mdc-form-field" id="playAsWhite">
+          <div class="mdc-radio">
+            <input class="mdc-radio__native-control" type="radio" id="blackValue" name="color" value="black" >
+            <div class="mdc-radio__background">
+              <div class="mdc-radio__outer-circle"></div>
+              <div class="mdc-radio__inner-circle"></div>
+            </div>
+            <div class="mdc-radio__ripple"></div>
+            <div class="mdc-radio__focus-ring"></div>
+          </div>
+          <label for="color">Black</label>
+        </div>
+
+        <div class="mdc-form-field" id="playAsRandom">
+          <div class="mdc-radio">
+            <input class="mdc-radio__native-control" type="radio" id="randomValue" name="color" value="random">
+            <div class="mdc-radio__background">
+              <div class="mdc-radio__outer-circle"></div>
+              <div class="mdc-radio__inner-circle"></div>
+            </div>
+            <div class="mdc-radio__ripple"></div>
+            <div class="mdc-radio__focus-ring"></div>
+          </div>
+          <label for="color">Random</label>
+        </div>
+      </div>
+      <div class="flex hidden" id="boardSize">
+        <h2>Board Size</h2>
+        <div class="mdc-form-field" id="sixBySix">
+          <div class="mdc-radio">
+            <input class="mdc-radio__native-control" type="radio" id="sixBySixValue" name="boardSize" value="6" checked>
+            <div class="mdc-radio__background">
+              <div class="mdc-radio__outer-circle"></div>
+              <div class="mdc-radio__inner-circle"></div>
+            </div>
+            <div class="mdc-radio__ripple"></div>
+            <div class="mdc-radio__focus-ring"></div>
+          </div>
+          <label for="boardSize">6x6</label>
+        </div>
+        <div class="mdc-form-field" id="tenByten">
+          <div class="mdc-radio">
+            <input class="mdc-radio__native-control" type="radio" id="tenBytenValue" name="boardSize" value="10">
+            <div class="mdc-radio__background">
+              <div class="mdc-radio__outer-circle"></div>
+              <div class="mdc-radio__inner-circle"></div>
+            </div>
+            <div class="mdc-radio__ripple"></div>
+            <div class="mdc-radio__focus-ring"></div>
+          </div>
+          <label for="boardSize">10x10</label>
+        </div>
+      </div>
+      <button class="mdc-button mdc-button--raised hidden" id="startGameBtn">
+          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
+          <span class="mdc-button__label">Start game</span>
       </button>
-      <button class="mdc-button mdc-button--raised hidden" id="playAsBlack">
-          <span class="mdc-button__label">play as black</span>
-      </button>
-      <button class="mdc-button mdc-button--raised hidden" id="playAsRandom">
-          <span class="mdc-button__label">play as random</span>
-      </button>
+
       <button class="mdc-button mdc-button--raised hidden" id="signOutBtn">
           <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
           <span class="mdc-button__label">Sign out</span>
@@ -94,17 +159,18 @@ height="45">
     <ul>
     </ul>
   </div>
-  <div id="dailies" class="module">
-    <label>Daily Games</label>
-    <ul>
-    </ul>
+  <div class="flex">
+    <div id="dailies" class="module">
+      <label>Looking for Daily Game</label>
+      <ul>
+      </ul>
+    </div>
+    <div id="mydailies" class="module">
+      <label>My Active Daily Games</label>
+      <ul>
+      </ul>
+    </div>
   </div>
-  <div id="mydailies" class="module">
-    <label>My Daily Games</label>
-    <ul>
-    </ul>
-  </div>
-
   <div id="game" class="hidden">
     <div id="playerBar">
       <div id="player1" class="mdc-button"></div>

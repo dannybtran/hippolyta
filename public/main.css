@@ -106,6 +106,8 @@ div#videos > video {
   border: 1px solid grey;
   margin-top: 1rem;
   padding-bottom: 0.5rem;
+  flex-basis: 100%;
+  box-sizing: border-box;
 }
 
 .module label {
@@ -276,6 +278,7 @@ svg { transform: scale(0.8); }
   #playerBar > *:last-child {
     margin-right: 0;
   }
+  .module { flex-basis: 48%; margin: 1%; }
 }
 
 /* @media screen and (min-width: 1024px) {
@@ -307,11 +310,21 @@ svg { transform: scale(0.8); }
   border: 2px solid yellow;
 }
 
-body #mydailies button.mdc-button {
+body #dailies button.mdc-button.black {
+    background-color: black !important;
+    color: white;
+}
+
+body  #dailies button.mdc-button.white {
+    background-color: white !important;
+    color: black;
+}
+
+body #mydailies button.mdc-button, body #dailies button.mdc-button {
     background-color: #8b0000 !important;
     flex-basis: auto;
     box-sizing: border-box;
-    margin: 1%;
+    margin: 0.5rem;
 }
 
 body button.mdc-button {
@@ -356,4 +369,23 @@ body button#resetMoveBtn.mdc-button {
 
 #playerBar *[disabled] {
   opacity: 0.05;
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+.flex.hidden {
+  display: none;
+}
+
+.boardSize { flex-basis: 3rem; text-align: center; }
+#boardSize h2 { flex-basis: 100%; }
+#sixBySix, #tenByTen { flex-basis: 100%; }
+#playAs h2 { flex-basis: 100%; }
+#playAs > div { flex-basis: 100%; }
+#playAs, #boardSize { flex-basis: 100%; }
+body button#startGameBtn.mdc-button {
+    background-color: green !important;
+    margin-top: 2rem;
 }
