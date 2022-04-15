@@ -168,8 +168,12 @@ div#videos > video {
   box-sizing: border-box;
   position: relative;
 }
-.square:after { content: ""; display: block; padding-bottom: 100%;
-  pointer-events: none; }
+.square:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+  pointer-events: none;
+}
 .square .piece {
   top: 50%;
   left: 50%;
@@ -193,6 +197,12 @@ svg { transform: scale(0.8); }
   margin-bottom: 0.5rem;
   border: 2px solid var(--mdc-theme-text-primary-on-background);
 }
+#board:after {
+  content: "";
+  display: block;
+  pointer-events: none;
+}
+
 
 .square.highlight {
   box-shadow:inset 0px 0px 0px 5px chartreuse;
@@ -339,6 +349,8 @@ body button#startGameBtn.mdc-button {
   flex-wrap: wrap;
   flex-basis: 100%;
   min-height: 30vh;
+  height: 64vw;
+  max-height: 80vh;
 }
 
 #moveHistory {
@@ -443,10 +455,11 @@ body button#startGameBtn.mdc-button {
 
 @media screen and (min-width: 768px) {
   #board {
-    flex-basis: 70%;
+    flex-basis: 64vw;
     margin-bottom: 0;
     max-width: 80vh;
-    height: 70%;
+    height: 64vw;
+    max-height: 80vh;
   }
   #moveHistory {
     flex-basis: 100%;
