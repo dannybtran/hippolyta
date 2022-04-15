@@ -1,5 +1,7 @@
 Array.from(document.querySelectorAll('.mdc-button')).forEach($e => mdc.ripple.MDCRipple.attachTo($e))
 
+  const drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('#mobileNav'));
+
 const configuration = {
   iceServers: [
     {
@@ -45,46 +47,98 @@ function init() {
   document.querySelector('#hangupBtn').addEventListener('click', hangUp)
   document.querySelector('#leaveDailyBtn').addEventListener('click', leaveDaily)
   document.querySelector('#createBtn').addEventListener('click', () => { createRoom() })
-  document.querySelector('#refreshBtn').addEventListener('click', refreshRooms)
+  //document.querySelector('#refreshBtn').addEventListener('click', refreshRooms)
   document.querySelector('#createDailyBtn').addEventListener('click', createDailyGame)
+
+  document.querySelector('#mobileCreateDailyBtn').addEventListener('click', () => {
+    if (drawer.open) { toggleMobileNav() }
+    createDailyGame()
+  })
+
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'))
   nameDialog = new mdc.dialog.MDCDialog(document.querySelector('#name-dialog'))
   // nameDialog.open()
   document.querySelector('#submitName').addEventListener('click', submitName)
   document.querySelector('#user-name').addEventListener('keypress', typeUserName)
   document.querySelector('#signInBtn').addEventListener('click', signIn)
-  document.querySelector('#signOutBtn').addEventListener('click', signOut)
+
+  document.querySelector('#mobileSignOutBtn').addEventListener('click', () => {
+    if (drawer.open) { toggleMobileNav() }
+    signOut()
+  })
+
   document.querySelector('#moveHistory').addEventListener('click', (e) => { if (e.target.id === 'moveHistory') { handleGameSnap(currentGameSnap) } })
   document.querySelector('#resetMoveBtn').addEventListener('click', (e) => { handleGameSnap(currentGameSnap); disable('#resetMoveBtn'); disable('#confirmMoveBtn'); })
   document.querySelector('#startGameBtn').addEventListener('click', startGame)
+
+  document.querySelector('#lightTheme').addEventListener('click', () => activateTheme('light'))
+  document.querySelector('#darkTheme').addEventListener('click', () => activateTheme('dark'))
+
+  document.querySelector('#mobileNavBtn').addEventListener('click', toggleMobileNav)
+
+  document.body.addEventListener('MDCDrawer:closed', () => {
+    document.querySelector('.mdc-drawer-scrim').style.display = 'none'
+  });
+
   if (location.hostname === 'localhost') {
     firebase.firestore().settings({host: 'localhost:4102', ssl: false})
   }
-  const unsub = firebase.auth().onAuthStateChanged(user => {
-    unsub()
+
+  const unsub = firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
+      let u = await db.collection('users').doc(firebase.auth().getUid()).get()
+      if (u) {
+        activateTheme(u.data()?.theme || 'light')
+      }
       show('#createDailyBtn')
-      show('#refreshBtn')
-      show('#signOutBtn')
+      show('#themeLabel', 'block')
+      show('#themeList', 'block')
+      show('#mobileSignOutBtn')
+      document.querySelector('#signedInName').innerText = `Hi, ${user.displayName}`
     } else {
+      console.log(user)
       show('#signInBtn')
+      hide('#themeList')
+      hide('#themeLabel')
+      document.querySelector('#signedInName').innerText = `Hi, Guest`
     }
   })
+}
+
+async function activateTheme(t) {
+  const cl = document.querySelector('body').classList
+  let u = await db.collection('users').doc(firebase.auth().getUid())
+  switch(t) {
+    case 'light':
+      cl.remove('dark')
+      cl.add('light')
+      if (u) { u.update({theme: t}) }
+      break;
+    case 'dark':
+      cl.remove('light')
+      cl.add('dark')
+      if (u) { u.update({theme: t}) }
+      break;
+  }
+}
+async function toggleMobileNav() {
+  drawer.open = !drawer.open
+  document.querySelector('.mdc-drawer-scrim').style.display = drawer.open ? 'block' : 'none';
 }
 
 async function signIn() {
   await signInAndSaveUser()
   hide('#signInBtn')
   show('#createDailyBtn')
-  show('#refreshBtn')
-  show('#signOutBtn')
+  show('#mobileSignOutBtn')
+  refreshRooms()
 }
 
 async function signOut() {
   await firebase.auth().signOut()
-  hide('#signOutBtn')
+  hide('#mobileSignOutBtn')
   hide('#createDailyBtn')
-  hide('#refreshBtn')
+  hide('#game')
   show('#signInBtn')
 }
 
@@ -105,8 +159,7 @@ async function createDailyGame() {
   hide('#mydailies')
   hide('#createBtn')
   hide('#createDailyBtn')
-  hide('#refreshBtn')
-  hide('#signOutBtn')
+  hide('#game')
   show('#playAs', 'flex')
   show('#boardSize', 'flex')
   show('#startGameBtn')
@@ -271,7 +324,6 @@ async function refreshRooms() {
 async function createRoom(roomId) {
   hide('#rooms')
   hide('#createBtn')
-  hide('#refreshBtn')
   hide('#leaveDailyBtn')
   show('#hangupBtn')
 
@@ -431,8 +483,13 @@ let unsubGame
 let currentGameSnap
 
 async function gotoDailyById(gameId) {
-  show('#game', 'flex')
-  if (!firebase.auth().currentUser) { await signInAndSaveUser() }
+  hide('#rooms')
+  hide('#dailies')
+  hide('#mydailies')
+  hide('#createBtn')
+  hide('#createDailyBtn')
+  hide('#leaveDailyBtn')
+    if (!firebase.auth().currentUser) { await signInAndSaveUser() }
   const $board = document.querySelector('#board')
   $board.innerHTML = '' // clear the existing chess board HTML
   const $chatLog = document.querySelector('#chatLog')
@@ -446,23 +503,15 @@ async function gotoDailyById(gameId) {
     const p1 = await db.collection('users').doc(player1).get()
     $p1.innerText = p1.data().name
   } else {
-    $p1.innerText = 'Waiting'
+    $p1.innerText = 'Waiting for opponent'
   }
   if (player2) {
     const p2 = await db.collection('users').doc(player2).get()
     $p2.innerText = p2.data().name
   } else {
-    $p2.innerText = 'Waiting'
+    $p2.innerText = 'Waiting for opponent'
   }
   game.onSnapshot(handleGameSnap)
-  hide('#rooms')
-  hide('#dailies')
-  hide('#mydailies')
-  hide('#createBtn')
-  hide('#createDailyBtn')
-  hide('#refreshBtn')
-  hide('#leaveDailyBtn')
-  hide('#signOutBtn')
   show('#game', 'flex')
 }
 
@@ -473,22 +522,33 @@ async function handleGameSnap(data) {
   const $p2 = document.querySelector('#player2')
   currentGameSnap = data
   const d = data.data()
+  const { player1, player2 } = d
   if (d.board && !dontDraw) {
     draw(JSON.parse(d.board))
   }
 
-  if (d.player2 && $p2.innerText === 'Waiting') {
-    const p2 = await db.collection('users').doc(d.player2).get()
+  if (!player1 || !player2) {
+    hide('#board')
+    hide('#moveHistory')
+    hide('#chat')
+  } else {
+    show('#board', 'flex')
+    show('#moveHistory', 'flex')
+    show('#chat', 'flex')
+  }
+
+  if (player2 && $p2.innerText === 'Waiting') {
+    const p2 = await db.collection('users').doc(player2).get()
     $p2.innerText = p2.data().name
   }
-  if (d.player1 && $p1.innerText === 'Waiting') {
-    const p1 = await db.collection('users').doc(d.player1).get()
+  if (player1 && $p1.innerText === 'Waiting') {
+    const p1 = await db.collection('users').doc(player1).get()
     $p1.innerText = p1.data().name
   }
   if (d.state === 'player1_move') {
     $p1.classList.add('active')
     $p2.classList.remove('active')
-    if (d.player1 === firebase.auth().getUid() && d.lastMoveAndShot1 === null) {
+    if (player1 === firebase.auth().getUid() && d.lastMoveAndShot1 === null) {
       await activateMoveTurn('w', d.board, data.id)
     }
     loadMoveHistory(d.moveHistory, d.board)
@@ -496,7 +556,7 @@ async function handleGameSnap(data) {
   } else if (d.state === 'player2_move') {
     $p2.classList.add('active')
     $p1.classList.remove('active')
-    if (d.player2 === firebase.auth().getUid() && d.lastMoveAndShot2 === null) {
+    if (player2 === firebase.auth().getUid() && d.lastMoveAndShot2 === null) {
       await activateMoveTurn('b', d.board, data.id)
     }
     loadMoveHistory(d.moveHistory, d.board)
@@ -656,7 +716,6 @@ async function leaveDaily(e) {
     hide('#game')
     //show('#createBtn')
     show('#createDailyBtn')
-    show('#refreshBtn')
     //show('#rooms', 'block')
     show('#dailies', 'block')
     show('#mydailies', 'block')
@@ -697,7 +756,7 @@ async function loadMoveHistory(moveHistory, board) {
     const { move, shot } = m
     const $m = document.createElement('div')
     if (turn === 2) { $m.classList.add('p2') }
-    $m.innerHTML = `${String.fromCharCode(97+move.x)}${b.length-move.y}&hyphen;${String.fromCharCode(97+move.nx)}${b.length-move.ny} => ${String.fromCharCode(97+shot.nx)}${b.length-shot.ny}`
+    $m.innerHTML = `${String.fromCharCode(97+move.x)}${b.length-move.y}&hyphen;${String.fromCharCode(97+move.nx)}${b.length-move.ny}&#10143;${String.fromCharCode(97+shot.nx)}${b.length-shot.ny}`
     $m.addEventListener('click', showMoveAt.bind(null, i, mh, b, $m))
     $mh.appendChild($m)
   })
@@ -809,4 +868,4 @@ function freshBoard(b) {
 }
 
 init()
-// refreshRooms()
+refreshRooms()

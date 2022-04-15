@@ -17,16 +17,19 @@
     <!-- initialize the SDK after all desired features are loaded -->
     <script src="/__/firebase/init.js"></script>
     <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" type="text/css" href="themes.css">
     <script src="svgs.js"></script>
 </head>
 <body>
-<nav>
+
+<nav id="mainNav">
+  <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button" id="mobileNavBtn">menu</button>
   <a href="/"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="45"
 height="45">
-<g style="fill:#000000;stroke:#000000;stroke-width:1.5; stroke-linecap:round;stroke-linejoin:round">
+<g style="fill:currentColor;stroke:currentColor;stroke-width:1.5; stroke-linecap:round;stroke-linejoin:round">
 
   <path d="M 9,26 C 17.5,24.5 30,24.5 36,26 L 38.5,13.5 L 31,25 L 30.7,10.9 L 25.5,24.5 L 22.5,10 L 19.5,24.5 L 14.3,10.9 L 14,25 L 6.5,13.5 L 9,26 z"
-  style="stroke-linecap:butt;fill:#000000" />
+  style="stroke-linecap:butt;fill:currentColor" />
   <path d="m 9,26 c 0,2 1.5,2 2.5,4 1,1.5 1,1 0.5,3.5 -1.5,1 -1,2.5 -1,2.5 -1.5,1.5 0,2.5 0,2.5 6.5,1 16.5,1 23,0 0,0 1.5,-1 0,-2.5 0,0 0.5,-1.5 -1,-2.5 -0.5,-2.5 -0.5,-2 0.5,-3.5 1,-2 2.5,-2 2.5,-4 -8.5,-1.5 -18.5,-1.5 -27,0 z" />
   <path d="M 11.5,30 C 15,29 30,29 33.5,30" />
   <path d="m 12,33.5 c 6,-1 15,-1 21,0" />
@@ -36,8 +39,8 @@ height="45">
   <circle cx="31" cy="9" r="2" />
   <circle cx="39" cy="12" r="2" />
   <path d="M 11,38.5 A 35,35 1 0 0 34,38.5"
-  style="fill:none; stroke:#000000;stroke-linecap:butt;" />
-  <g style="fill:none; stroke:#ffffff;">
+  style="fill:none; stroke:currentColor;stroke-linecap:butt;" />
+  <g class="offsetStroke" style="fill:none;">
     <path d="M 11,29 A 35,35 1 0 1 34,29" />
     <path d="M 12.5,31.5 L 32.5,31.5" />
     <path d="M 11.5,34.5 A 35,35 1 0 0 33.5,34.5" />
@@ -46,7 +49,48 @@ height="45">
 </g>
 </svg></a><h1>Hippolyta</h1><h2>Game of the Amazons</h2>
 </nav>
-<container>
+<container id="content">
+  <aside class="mdc-drawer mdc-drawer--modal" id="mobileNav">
+    <div class="mdc-drawer__content">
+      <nav class="mdc-list">
+        <span class="mdc-list-item" id="signedInName">
+          Hi, Guest
+        </span>
+        <hr class="mdc-list-divider">
+        <a class="mdc-list-item" href="/" tabindex="0">
+          <span class="mdc-list-item__ripple"></span>
+          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">house</i>
+          <span class="mdc-list-item__text">Home</span>
+        </a>
+        <a class="mdc-list-item" href="#" id="mobileCreateDailyBtn">
+          <span class="mdc-list-item__ripple"></span>
+          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">light_mode</i>
+          <span class="mdc-list-item__text">Daily Game</span>
+        </a>
+        <a class="mdc-list-item hidden" href="#" id="themeLabel">
+          <span class="mdc-list-item__ripple"></span>
+          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">palette</i>
+          <span class="mdc-list-item__text">Themes</span>
+        </a>
+        <nav class="mdc-list hidden" id="themeList">
+          <a class="mdc-list-item" href="#" id="lightTheme">
+            <span class="mdc-list-item__ripple"></span>
+            <span class="mdc-list-item__text">Light</span>
+          </a>
+          <a class="mdc-list-item" href="#" id="darkTheme">
+            <span class="mdc-list-item__ripple"></span>
+            <span class="mdc-list-item__text">Dark</span>
+          </a>
+        </nav>
+        <a class="mdc-list-item hidden" href="#" id="mobileSignOutBtn">
+          <span class="mdc-list-item__ripple"></span>
+          <i class="material-icons mdc-list-item__graphic" aria-hidden="true">person</i>
+          <span class="mdc-list-item__text">Sign Out</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+  <div class="mdc-drawer-scrim"></div>
   <div id="buttons">
       <button class="mdc-button mdc-button--raised hidden" id="signInBtn">
           <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
@@ -145,11 +189,6 @@ height="45">
           <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
           <span class="mdc-button__label">Start game</span>
       </button>
-
-      <button class="mdc-button mdc-button--raised hidden" id="signOutBtn">
-          <i class="material-icons mdc-button__icon" aria-hidden="true">person</i>
-          <span class="mdc-button__label">Sign out</span>
-      </button>
   </div>
   <div>
       <span id="currentRoom"></span>
@@ -173,8 +212,8 @@ height="45">
   </div>
   <div id="game" class="hidden">
     <div id="playerBar">
-      <div id="player1" class="mdc-button"></div>
-      <div id="player2" class="mdc-button"></div>
+      <div id="player1" class="mdc-button active"></div>
+      <div id="player2" class="mdc-button active"></div>
       <div class="spacer"></div>
       <button class="mdc-button mdc-button--raised" disabled id="resetMoveBtn">
           <i class="material-icons mdc-button__icon" aria-hidden="true" >close</i>
@@ -186,10 +225,12 @@ height="45">
       </button>
     </div>
     <div id="board" ></div>
-    <div id="moveHistory" class="hidden"></div>
-    <div id="chat">
-      <div id="chatLog"></div>
-      <input type="text" id="chatEntry" />
+    <div id="sideBar">
+      <div id="moveHistory" class="hidden"></div>
+      <div id="chat">
+        <div id="chatLog"></div>
+        <input type="text" id="chatEntry" />
+      </div>
     </div>
   </div>
 

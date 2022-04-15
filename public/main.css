@@ -1,18 +1,18 @@
 body {
-    background: #ECEFF1;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--mdc-theme-text-primary-on-background);
     font-family: Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: var(--mdc-theme-background);
 }
-
-nav {
+nav#mainNav {
   display: flex;
   border-bottom: 1px solid #ccc;
-  padding: 0 0.8rem;
+  padding: 0 0.8rem 0 0;
   margin: 0;
-  background-color: #ddd;
   overflow: auto;
+  background-color: var(--mdc-theme-background);
+  color: var(--mdc-theme-text-primary-on-background);
 }
 
 nav h1 {
@@ -24,8 +24,25 @@ nav h2 {
   padding-top: 3px;
   font-size: 0.8rem;
   line-height: 1.2rem;
-  color: darkred;
+  color: var(--mdc-theme-primary);
 }
+
+nav svg {
+  color: var(--mdc-theme-text-primary-on-background);
+}
+nav svg .offsetStroke {
+  color: var(--mdc-theme-background);
+}
+.mdc-radio .mdc-radio__outer-circle {
+  border-color: var(--mdc-theme-text-primary-on-background) !important;
+}
+container {
+  padding: 0.5rem;
+  display: block;
+  background-color: var(--mdc-theme-background);
+}
+
+
 .hidden {
   display: none;
 }
@@ -79,10 +96,6 @@ nav h2 {
     font-size: 13px;
 }
 
-container {
-  padding: 0.5rem;
-  display: block;
-}
 
 button {
     margin: 0.2em 0.1em;
@@ -112,7 +125,6 @@ div#videos > video {
 
 .module label {
   padding: 0.5rem;
-  background-color: #ccc;
   display: block;
   border-bottom: 1px solid black;
   margin-bottom: 0.5rem;
@@ -145,90 +157,49 @@ div#videos > video {
 }
 
 .date {
-  flex-basis: 2rem;
+  flex-basis: 2.5rem;
   text-align: center;
   font-size: 0.8rem;
 }
 
-#moveHistory {
-  padding: 1rem;
-  border: 1px solid grey;
-  flex-basis: 100%;
-  height: auto;
-  margin: 0 0 0 auto;
-  display: flex;
+.square {
+  border: 2px solid var(--mdc-theme-text-primary-on-background);
+  background-color: var(--mdc-theme-square);
   box-sizing: border-box;
-  flex-wrap: wrap;
-  overflow-y: scroll;
-  align-content: start;
+  position: relative;
 }
-
-#moveHistory div {
-  border: 1px solid grey;
-  margin: 1%;
-  padding: 0 1%;
-  flex-basis: 48%;
-  height: 2rem;
-  box-sizing: border-box;
-  line-height: 2rem;
-  cursor: pointer;
-}
-
-#moveHistory div.selected {
-  border: 2px solid cornflowerblue;
-}
-
-#moveHistory .p2 {
-  background-color: #555;
-  color: white;
-}
-
-#chat {
-  flex-basis: 100%;
-
-}
-#chatLog {
-  padding: 1rem;
-  border: 1px solid grey;
-  width: 100%;
-  height: 250px;
-  margin-top: 1rem;
-  display: inline-block;
-  box-sizing: border-box;
-  white-space: pre;
-}
-
-#chatEntry {
-  display: block;
-  font-size: 1rem;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.square { border: 2px solid rgba(0,0,0,0.1);
-  box-sizing: border-box; position: relative; }
-#board .influence { border: 2px solid black; }
-#board .hovered { border: 2px solid chartreuse; }
 .square:after { content: ""; display: block; padding-bottom: 100%;
   pointer-events: none; }
-.square .piece { top: 50%; left: 50%;
-  position: absolute; line-height: 100%; pointer-events: none;
-  transform: translate(-50% , -50%); }
-.darkener { background: rgba(0,0,0,0.08); position: absolute; top: 0;
+.square .piece {
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  line-height: 100%;
+  pointer-events: none;
+  transform: translate(-50% , -50%);
+}
+.square .piece svg {
+  filter: drop-shadow(0px 0px 5px rgba(255,255,255,0.25));
+}
+.darkener { background: rgba(0,0,0,0.15); position: absolute; top: 0;
   left: 0; bottom: 0; right: 0; pointer-events: none; }
 
 svg { transform: scale(0.8); }
 
-#board { width: 100%; display: flex; flex-wrap: wrap; margin-bottom: 0.5rem;  }
+#board {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  border: 2px solid var(--mdc-theme-text-primary-on-background);
+}
 
 .square.highlight {
-  border: 2px solid green;
+  box-shadow:inset 0px 0px 0px 5px chartreuse;
   cursor: pointer;
 }
 .square.selected {
-  border: 2px solid blue;
+  box-shadow:inset 0px 0px 0px 5px blue;
 }
 .square.possibleMove, .square.possibleShoot {
   cursor: pointer;
@@ -244,7 +215,6 @@ svg { transform: scale(0.8); }
   margin-top: -0.5rem;
   margin-left: -0.5rem;
 }
-
 .square.possibleShoot .control {
   background-color: red;
   width: 1rem;
@@ -256,29 +226,8 @@ svg { transform: scale(0.8); }
   margin-top: -0.5rem;
   margin-left: -0.5rem;
 }
-
-@media screen and (min-width: 768px) {
-  #board { flex-basis: 50%; margin-bottom: 0; }
-  #moveHistory { flex-basis: 48%; }
-  #top { font-size: 1rem; margin-top: 1rem; }
-  #fen { font-size: 1rem; }
-  #load { font-size: 1rem; }
-  #side { width: 40%; padding-left: 1rem; }
-  #pgn { font-size: 1rem; }
-  #loadPgn { font-size: 1rem; }
-  body button.mdc-button {
-      flex-basis: auto !important;
-  }
-  #player1, #player2 { flex-basis: auto !important; }
-  #spacer { display: inline-block; }
-  #playerBar > *:first-child {
-    margin-left: 0;
-  }
-
-  #playerBar > *:last-child {
-    margin-right: 0;
-  }
-  .module { flex-basis: 48%; margin: 1%; }
+.square.lastMove, .square.lastShot {
+  box-shadow:inset 0px 0px 0px 5px var(--mdc-theme-last-move);
 }
 
 /* @media screen and (min-width: 1024px) {
@@ -287,59 +236,49 @@ svg { transform: scale(0.8); }
 } */
 
 #player1 {
-  opacity: 0.08;
-  background-color: white !important;
+  opacity: 0.5;
   color: black;
   cursor: initial;
   flex-basis: 48%;
   margin: 1%;
+  background-color: white;
 }
 
-#player1.active, #player2.active { opacity: 1; }
+#player1.active, #player2.active {
+  opacity: 1;
+}
 
 #player2 {
-  opacity: 0.08;
-  background-color: black !important;
-  color: white;
+  opacity: 0.5;
+  color: black;
   cursor: initial;
   flex-basis: 48%;
   margin: 1%;
+  background-color: white;
 }
 
-.lastMove, .lastShot {
-  border: 2px solid yellow;
-}
 
 body #dailies button.mdc-button.black {
-    background-color: black !important;
     color: white;
+    background-color: #333;
 }
 
 body  #dailies button.mdc-button.white {
-    background-color: white !important;
     color: black;
+    background-color: white;
 }
 
 body #mydailies button.mdc-button, body #dailies button.mdc-button {
-    background-color: #8b0000 !important;
     flex-basis: auto;
     box-sizing: border-box;
     margin: 0.5rem;
 }
 
 body button.mdc-button {
-    background-color: #8b0000 !important;
     flex-basis: 48%;
     box-sizing: border-box;
     margin: 1%;
-}
-
-body button#confirmMoveBtn.mdc-button {
-    background-color: green !important;
-}
-
-body button#resetMoveBtn.mdc-button {
-    background-color: grey !important;
+    background-color: var(--mdc-theme-background);
 }
 
 #game.hidden {
@@ -349,6 +288,8 @@ body button#resetMoveBtn.mdc-button {
 #game {
   display: flex;
   flex-wrap: wrap;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 #playerBar {
   flex-basis: 100%;
@@ -368,7 +309,11 @@ body button#resetMoveBtn.mdc-button {
 }
 
 #playerBar *[disabled] {
-  opacity: 0.05;
+  opacity: 0.5;
+}
+
+#playerBar #resetMoveBtn:not(:disabled) {
+  background-color: var(--mdc-theme-error);
 }
 
 .flex {
@@ -386,6 +331,154 @@ body button#resetMoveBtn.mdc-button {
 #playAs > div { flex-basis: 100%; }
 #playAs, #boardSize { flex-basis: 100%; }
 body button#startGameBtn.mdc-button {
-    background-color: green !important;
     margin-top: 2rem;
+}
+
+#sideBar {
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+  min-height: 30vh;
+}
+
+#moveHistory {
+  /* border: 1px solid grey; */
+  flex-basis: 48%;
+  height: 100%;
+  display: flex;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  overflow-y: scroll;
+  align-content: start;
+  margin-right: auto;
+  padding-bottom: 2rem;
+}
+
+#moveHistory div {
+  border: 1px solid grey;
+  margin: 1%;
+  padding: 0 1%;
+  flex-basis: 48%;
+  height: 2rem;
+  box-sizing: border-box;
+  line-height: 2rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-align: center;
+  background-color: white;
+  color: black;
+}
+
+#moveHistory div.selected {
+  box-shadow:inset 0px 0px 0px 5px var(--mdc-theme-primary);
+}
+
+#moveHistory .p2 {
+  color: white;
+  background-color: black;
+}
+
+#chat {
+  flex-basis: 48%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+}
+
+#chatLog {
+  padding: 1rem;
+  border: 1px solid grey;
+  width: 100%;
+  height: calc(100% - 3.5rem);
+  display: inline-block;
+  box-sizing: border-box;
+  white-space: pre;
+  flex-basis: 100%;
+}
+
+#chatEntry {
+  display: block;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  height: 2rem;
+}
+
+#mobileNavBtn {
+  margin: 0;
+  padding: 0;
+}
+
+#mobileNav {
+  margin: -0.5rem 0 0 0;
+}
+
+#mobileNav .mdc-list-item {
+  padding: 0.5rem;
+}
+
+#mobileNav .mdc-list {
+  padding: 0;
+}
+
+#themeList {
+    background-color: var(--mdc-theme-nested-drawer);
+}
+#themeList .mdc-list-item {
+  padding-left: 2rem;
+}
+.mdc-list-item__graphic {
+  margin-right: 0.5rem;
+}
+
+#signedInName.mdc-list-item {
+  padding-bottom: 0;
+}
+
+.mdc-drawer-scrim {
+  top: 51px;
+}
+
+@media screen and (min-width: 768px) {
+  #board {
+    flex-basis: 70%;
+    margin-bottom: 0;
+    max-width: 80vh;
+    height: 70%;
+  }
+  #moveHistory {
+    flex-basis: 100%;
+    margin: 0 0 1rem 0;
+    height: 50%;
+    border-bottom: 1px solid #ccc;
+  }
+  #chat { flex-basis: 100%; margin: 0; height: 50%; }
+  #top { font-size: 1rem; margin-top: 1rem; }
+  #fen { font-size: 1rem; }
+  #load { font-size: 1rem; }
+  #side { width: 40%; padding-left: 1rem; }
+  #pgn { font-size: 1rem; }
+  #loadPgn { font-size: 1rem; }
+  body button.mdc-button {
+      flex-basis: auto !important;
+  }
+  #player1, #player2 { flex-basis: auto !important; }
+  #spacer { display: inline-block; }
+  #playerBar > *:first-child {
+    margin-left: 0;
+  }
+
+  #playerBar > *:last-child {
+    margin-right: 0;
+  }
+  .module { flex-basis: 48%; margin: 1%; }
+  #sideBar {
+    flex-basis: 0;
+    flex-grow: 0.95;
+    margin-right: 0;
+    margin-left: auto;
+    align-content: start;
+  }
 }

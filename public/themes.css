@@ -1,0 +1,20 @@
+body.dark {
+  --mdc-theme-background: #191A19;
+  --mdc-theme-color: #fff;
+  --mdc-theme-surface: #191A19;
+  --mdc-theme-primary: #70bdf5;
+  --mdc-theme-secondary: #FFD369;
+  --mdc-theme-text-primary-on-background: #fff;
+  --mdc-protected-button-disabled-container-color: var(--mdc-theme-color);
+  --mdc-theme-nested-drawer: #333;
+  --mdc-theme-square: #70bdf5;
+  --mdc-theme-last-move: #FFD369;
+}
+
+body {
+  --theme-background: #ddd;
+  --mdc-theme-color: #000;
+  --mdc-theme-square: #fff;
+  --mdc-theme-primary: #70bdf5;
+  --mdc-theme-last-move: #FFD369;
+}
