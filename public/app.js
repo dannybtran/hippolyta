@@ -17,6 +17,7 @@ const configuration = {
 let peerConnection = null
 let roomDialog = null
 let nameDialog = null
+let resignDialog = null
 let roomId = null
 let dataChannel
 let userName = 'Guest'
@@ -57,6 +58,8 @@ function init() {
 
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'))
   nameDialog = new mdc.dialog.MDCDialog(document.querySelector('#name-dialog'))
+  resignDialog = new mdc.dialog.MDCDialog(document.querySelector('#resign-dialog'))
+
   // nameDialog.open()
   document.querySelector('#submitName').addEventListener('click', submitName)
   document.querySelector('#user-name').addEventListener('keypress', typeUserName)
@@ -75,6 +78,8 @@ function init() {
   document.querySelector('#darkTheme').addEventListener('click', () => activateTheme('dark'))
 
   document.querySelector('#mobileNavBtn').addEventListener('click', toggleMobileNav)
+  document.querySelector('#resignBtn').addEventListener('click', () => resignDialog.open())
+  document.querySelector('#confirmResignBtn').addEventListener('click', () => confirmResign())
 
   document.body.addEventListener('MDCDrawer:closed', () => {
     document.querySelector('.mdc-drawer-scrim').style.display = 'none'
@@ -121,6 +126,7 @@ async function activateTheme(t) {
       break;
   }
 }
+
 async function toggleMobileNav() {
   drawer.open = !drawer.open
   document.querySelector('.mdc-drawer-scrim').style.display = drawer.open ? 'block' : 'none';
@@ -513,6 +519,7 @@ async function gotoDailyById(gameId) {
   }
   game.onSnapshot(handleGameSnap)
   show('#game', 'flex')
+  enable('#resignBtn')
 }
 
 let abort
@@ -522,21 +529,23 @@ async function handleGameSnap(data) {
   const $p2 = document.querySelector('#player2')
   currentGameSnap = data
   const d = data.data()
-  const { player1, player2 } = d
+  const { player1, player2, player1_resign, player2_resign } = d
   if (d.board && !dontDraw) {
     draw(JSON.parse(d.board))
   }
 
   if (!player1 || !player2) {
-    hide('#board')
+    hide('#boardWrapper')
     hide('#moveHistory')
     hide('#chat')
   } else {
-    show('#board', 'flex')
+    show('#boardWrapper', 'flex')
     show('#moveHistory', 'flex')
     show('#chat', 'flex')
   }
-
+  if (player1_resign || player2_resign) {
+    disable('#resignBtn')
+  }
   if (player2 && $p2.innerText === 'Waiting') {
     const p2 = await db.collection('users').doc(player2).get()
     $p2.innerText = p2.data().name
@@ -562,6 +571,9 @@ async function handleGameSnap(data) {
     loadMoveHistory(d.moveHistory, d.board)
     if (!dontDraw) { showLastMoveAndShot(d.board, d.lastMoveAndShot1) }
   } else if (d.state === 'player1_wins') {
+    if (d.player2_resign) {
+      addChatMsg('Black resigns.')
+    }
     addChatMsg('White wins!')
     Array.from(document.getElementsByClassName('highlight')).forEach($e =>
       $e.classList.remove('highlight')
@@ -570,6 +582,9 @@ async function handleGameSnap(data) {
     draw(JSON.parse(d.board))
     loadMoveHistory(d.moveHistory, d.board)
   } else if (d.state === 'player2_wins') {
+    if (d.player1_resign) {
+      addChatMsg('White resigns.')
+    }
     addChatMsg('Black wins!')
     Array.from(document.getElementsByClassName('highlight')).forEach($e =>
       $e.classList.remove('highlight')
@@ -710,6 +725,16 @@ async function shootToSquare(b, x, y, nx, ny, gameId, color, lm) {
   })
 }
 
+async function confirmResign() {
+  if (currentGameSnap) {
+    const d = currentGameSnap.data()
+    const key = firebase.auth().getUid() === d.player1 ? 'player1_resign' : 'player2_resign'
+    await firebase.firestore().collection('games').doc(currentGameSnap.id).update({
+      [key]: true
+    })
+  }
+}
+
 async function leaveDaily(e) {
     prevBoardString = null
     hide('#leaveDailyBtn')
@@ -762,7 +787,6 @@ async function loadMoveHistory(moveHistory, board) {
   })
   show('#moveHistory', 'flex')
 }
-
 
 async function showMoveAt(i, mh, b, $m) {
   let $selected = Array.from(document.querySelectorAll('#moveHistory > div.selected'))

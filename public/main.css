@@ -190,19 +190,45 @@ div#videos > video {
 
 svg { transform: scale(0.8); }
 
-#board {
+.mdc-dialog .mdc-dialog__title {
+  color: var(--mdc-theme-color);
+}
+
+.mdc-dialog .mdc-dialog__content {
+  color: var(--mdc-theme-color);
+}
+
+#boardWrapper {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 0.5rem;
-  border: 2px solid var(--mdc-theme-text-primary-on-background);
-}
-#board:after {
-  content: "";
-  display: block;
-  pointer-events: none;
 }
 
+#board {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  border: 2px solid var(--mdc-theme-text-primary-on-background);
+}
+
+#boardOptions {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--mdc-theme-color);
+}
+
+#resignBtn {
+  width: auto;
+  min-width: auto;
+}
+#resignBtn i {
+  margin: 0;
+}
+#confirmResignBtn {
+  background-color: var(--mdc-theme-error);
+  color: white;
+}
 
 .square.highlight {
   box-shadow:inset 0px 0px 0px 5px chartreuse;
@@ -454,12 +480,15 @@ body button#startGameBtn.mdc-button {
 }
 
 @media screen and (min-width: 768px) {
-  #board {
+  #boardWrapper {
     flex-basis: 64vw;
     margin-bottom: 0;
     max-width: 80vh;
+  }
+  #board {
     height: 64vw;
     max-height: 80vh;
+    background-color: var(--mdc-theme-color)
   }
   #moveHistory {
     flex-basis: 100%;

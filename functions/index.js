@@ -4,13 +4,37 @@ const { initializeApp } = require("firebase-admin/app");
 exports.backend = functions.firestore.document('/games/{gameId}').onWrite(
   change => {
       const data = change.after.data()
-      if (data.player1 && data.player2 && !data.board) {
+      if (!data) { return }
+
+      if (data.creatorId && !data.board) {
+        if (!data.player1 && !data.player2) {
+          if (Math.round(Math.random())) {
+            data.player1 = data.creatorId
+          } else {
+            data.player2 = data.creatorId
+          }
+        }
         change.after.ref.update({
           board: newBoard(data.boardSize || 6),
           state: 'player1_move',
           lastMoveAndShot1: null,
           lastMoveAndShot2: null,
+          player1: data.player1,
+          player2: data.player2,
         })
+      }
+      if (data.state === 'player1_move' || data.state === 'player2_move') {
+        if (data.player1_resign) {
+          data.state = 'player2_wins'
+          change.after.ref.update({
+            state: data.state
+          })
+        } else if (data.player2_resign) {
+          data.state = 'player1_wins'
+          change.after.ref.update({
+            state: data.state
+          })
+        }
       }
 
       if (data.board && checkWin(JSON.parse(data.board), change.after.ref)) return 0;

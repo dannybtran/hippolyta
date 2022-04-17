@@ -224,7 +224,14 @@ height="45">
           <span class="mdc-button__label">Confirm</span>
       </button>
     </div>
-    <div id="board" ></div>
+    <div id="boardWrapper">
+      <div id="board" ></div>
+      <div id="boardOptions">
+        <button class="mdc-button mdc-button--raised" id="resignBtn">
+            <i class="material-icons mdc-button__icon" aria-hidden="true" >flag</i>
+        </button>
+      </div>
+    </div>
     <div id="sideBar">
       <div id="moveHistory" class="hidden"></div>
       <div id="chat">
@@ -265,6 +272,32 @@ height="45">
       </div>
       <div class="mdc-dialog__scrim"></div>
   </div>
+
+  <div class="mdc-dialog"
+       id="resign-dialog"
+       role="alertdialog"
+       aria-modal="true"
+       aria-labelledby="my-dialog-title"
+       aria-describedby="my-dialog-content">
+      <div class="mdc-dialog__container">
+          <div class="mdc-dialog__surface">
+              <h2 class="mdc-dialog__title" id="resign-dialog-title">Resign game</h2>
+              <div class="mdc-dialog__content" id="resign-dialog-content">
+                  Are you sure you want to resign?
+              </div>
+              <footer class="mdc-dialog__actions">
+                  <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no">
+                      <span class="mdc-button__label">Cancel</span>
+                  </button>
+                  <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="yes" id="confirmResignBtn">
+                      <span class="mdc-button__label">Resign</span>
+                  </button>
+              </footer>
+          </div>
+      </div>
+      <div class="mdc-dialog__scrim"></div>
+  </div>
+
 
   <div class="mdc-dialog"
        id="name-dialog"
